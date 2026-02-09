@@ -15,6 +15,7 @@ from ..analyzer.matchups import MatchupAnalyzer
 from ..analyzer.trends import TrendsAnalyzer
 from ..analyzer.cards import CardAnalyzer
 from ..translation import translate_archetype
+from ..utils.card_db import CardDB
 
 
 app = Flask(__name__, 
@@ -93,10 +94,14 @@ def api_archetype_detail(name: str):
     """Get detailed analysis for a specific archetype."""
     data = get_data()
     
+    # Initialize CardDB
+    # Note: connect every time for simplicity, but consider connection pooling for high load
+    card_db = CardDB()
+    
     archetype_analyzer = ArchetypeAnalyzer(data)
     matchup_analyzer = MatchupAnalyzer(data)
     trends_analyzer = TrendsAnalyzer(data)
-    card_analyzer = CardAnalyzer(data)
+    card_analyzer = CardAnalyzer(data, card_db=card_db)
     
     detail = archetype_analyzer.get_archetype_detail(name)
     matchups = matchup_analyzer.get_archetype_matchups(name)

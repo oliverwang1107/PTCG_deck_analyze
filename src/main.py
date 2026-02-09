@@ -39,6 +39,11 @@ Examples:
         action="store_true",
         help="Fetch detailed card lists for each deck (slower, enables card analysis)"
     )
+    scrape_parser.add_argument(
+        "--update-card-map",
+        action="store_true",
+        help="Update Limitless to JP card mapping"
+    )
     
     # Analyze command
     analyze_parser = subparsers.add_parser("analyze", help="Show analysis summary")
@@ -84,6 +89,14 @@ def run_scrape(args):
     """Run the scraper."""
     from .scraper.limitless import LimitlessScraper
     
+    if args.update_card_map:
+        from .scraper.mapper import CardMapper
+        print("Starting card mapping update...")
+        mapper = CardMapper()
+        mapper.run()
+        if not args.limit and not args.fetch_cards:
+            return
+
     print(f"Starting scrape with limit={args.limit}, delay={args.delay}s, fetch_cards={args.fetch_cards}")
     
     scraper = LimitlessScraper(cache_dir="data", delay=args.delay)

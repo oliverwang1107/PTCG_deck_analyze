@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ptcg-tw-localdb"
+version = "0.1.0"
+description = "PTCG 繁中卡牌本地資料庫工具（抓取官方卡牌搜尋並寫入 SQLite）"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "requests>=2.32.0",
+  "beautifulsoup4>=4.12.3",
+]
+
+[project.scripts]
+ptcg_tw = "ptcg_tw.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ptcg_tw"]
+

@@ -20,16 +20,18 @@ class CardAnalyzer:
         "プライムキャッチャー", "マスターボール", "アンフェアスタンプ"
     ]
     
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, card_db=None):
         """
         Initialize with scraped data.
         
         Args:
             data: Dictionary containing scraped tournament and deck data
+            card_db: Optional CardDB instance for fetching card images/translations
         """
         self.data = data
         self.tournaments = data.get("tournaments", [])
         self._card_cache = {}
+        self.card_db = card_db
     
     def _get_decks_for_archetype(self, archetype: str) -> list[dict]:
         """Get all decks matching an archetype that have card data."""
@@ -81,7 +83,9 @@ class CardAnalyzer:
             "total_copies": 0,  # Total copies across all decks
             "min_copies": float('inf'),
             "max_copies": 0,
-            "card_type": "Pokemon"
+            "card_type": "Pokemon",
+            "representative_set": None,
+            "representative_number": None
         })
         
         for deck in decks:
@@ -99,6 +103,14 @@ class CardAnalyzer:
                 card_stats[name]["min_copies"] = min(card_stats[name]["min_copies"], count)
                 card_stats[name]["max_copies"] = max(card_stats[name]["max_copies"], count)
                 card_stats[name]["card_type"] = card_type
+                
+                # Capture representative set/number for mapping
+                if not card_stats[name]["representative_set"] and "set_code" in card:
+                    card_stats[name]["representative_set"] = card.get("set_code")
+                    # Handle card_id sometimes usually being "SET-NUMBER"
+                    card_id_parts = card.get("card_id", "").split("-")
+                    if len(card_id_parts) > 1:
+                        card_stats[name]["representative_number"] = card_id_parts[-1]
         
         deck_count = len(decks)
         
@@ -123,6 +135,17 @@ class CardAnalyzer:
                 "deck_count": stats["count"],
                 "card_type": stats["card_type"]
             }
+            
+            # Enrich with DB info
+            if self.card_db and stats["representative_set"] and stats["representative_number"]:
+                db_info = self.card_db.get_card_info(
+                    stats["representative_set"], 
+                    stats["representative_number"],
+                    english_name=card_name
+                )
+                if db_info:
+                    card_info["name_zh"] = db_info.get("name_zh")
+                    card_info["image_url"] = db_info.get("image_url")
             
             # Categorize by type
             if stats["card_type"] == "Pokemon":

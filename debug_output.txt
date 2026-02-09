@@ -1,0 +1,23 @@
+﻿Found 17 table rows
+Row 0: HEADER
+
+Row 1: 4 cells
+  img[alt] selector: 2 found
+  All img tags: 2 found
+    img attrs: {'class': "['pokemon']", 'src': 'https://r2.limitlesstcg.net/pokemon/gen9/barbaracl', 'alt': 'barbaracle'}
+    img attrs: {'class': "['pokemon']", 'src': 'https://r2.limitlesstcg.net/pokemon/gen9/okidogi.p', 'alt': 'okidogi'}
+  Extracted archetype: 'barbaracle / okidogi'
+
+Row 2: 4 cells
+  img[alt] selector: 2 found
+  All img tags: 2 found
+    img attrs: {'class': "['pokemon']", 'src': 'https://r2.limitlesstcg.net/pokemon/gen9/kangaskha', 'alt': 'kangaskhan-mega'}
+    img attrs: {'class': "['pokemon']", 'src': 'https://r2.limitlesstcg.net/pokemon/gen9/ogerpon.p', 'alt': 'ogerpon'}
+  Extracted archetype: 'kangaskhan-mega / ogerpon'
+
+Row 3: 4 cells
+  img[alt] selector: 2 found
+  All img tags: 2 found
+    img attrs: {'class': "['pokemon']", 'src': 'https://r2.limitlesstcg.net/pokemon/gen9/garchomp.', 'alt': 'garchomp'}
+    img attrs: {'class': "['pokemon']", 'src': 'https://r2.limitlesstcg.net/pokemon/gen9/roserade.', 'alt': 'roserade'}
+  Extracted archetype: 'garchomp / roserade'

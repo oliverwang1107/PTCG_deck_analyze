@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTCG City League 牌組分析器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-hover: #1f2b4a;
+            --accent-primary: #e94560;
+            --accent-secondary: #0f3460;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border-color: #2a2a4a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 30px rgba(233, 69, 96, 0.15);
+        }
+
+        .stat-card h3 {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-card h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-card h2::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Matchup Heatmap */
+        .heatmap-container {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 1200px) {
+            .heatmap-container {
+                grid-column: span 1;
+            }
+        }
+
+        .heatmap {
+            overflow-x: auto;
+        }
+
+        .heatmap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .heatmap th,
+        .heatmap td {
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .heatmap th {
+            background: var(--bg-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .heatmap td {
+            min-width: 50px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .heatmap td:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Archetype List */
+        .archetype-list {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .archetype-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--bg-secondary);
+        }
+
+        .archetype-item:hover {
+            background: var(--bg-hover);
+            transform: translateX(4px);
+        }
+
+        .archetype-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .archetype-rank {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .archetype-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .archetype-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .archetype-stats .win-rate {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-primary);
+        }
+
+        .matchup-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .matchup-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .matchup-section.favorable h3 {
+            color: var(--success);
+        }
+
+        .matchup-section.unfavorable h3 {
+            color: var(--danger);
+        }
+
+        .matchup-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
+        }
+
+        /* Weekly Section */
+        .weekly-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .week-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .week-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .week-stats {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .week-archetypes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .week-archetype-tag {
+            background: var(--bg-hover);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <h1>PTCG City League 分析器</h1>
+                <span>日本</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="refreshData()">🔄 重新整理</button>
+                <button class="btn btn-primary" onclick="scrapeNew()">📥 爬取新資料</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>賽事總數</h3>
+                <div class="value" id="total-tournaments">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>牌組總數</h3>
+                <div class="value" id="total-decks">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>牌組原型</h3>
+                <div class="value" id="total-archetypes">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>最後更新</h3>
+                <div class="value" id="last-updated" style="font-size: 1rem;">-</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2>牌組原型分布</h2>
+                <div class="chart-container">
+                    <canvas id="distribution-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>勝率排行</h2>
+                <div class="chart-container">
+                    <canvas id="winrate-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card heatmap-container">
+                <h2>對戰勝率矩陣</h2>
+                <div class="heatmap" id="matchup-heatmap">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Stats -->
+        <div class="weekly-section">
+            <h2 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 4px; height: 20px; background: var(--accent-gradient); border-radius: 2px;"></span>
+                每週賽事統計
+            </h2>
+            <div id="weekly-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archetype List -->
+        <div class="archetype-list">
+            <h2 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 4px; height: 20px; background: var(--accent-gradient); border-radius: 2px;"></span>
+                熱門牌組排行
+            </h2>
+            <div id="archetype-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">-</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Charts
+        let distributionChart = null;
+        let winrateChart = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOverview();
+            loadArchetypes();
+            loadWinrates();
+            loadMatchups();
+            loadWeekly();
+        });
+
+        // Close modal on outside click
+        document.getElementById('detail-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'detail-modal') closeModal();
+        });
+
+        async function loadOverview() {
+            try {
+                const res = await fetch('/api/overview');
+                const data = await res.json();
+
+                document.getElementById('total-tournaments').textContent = data.total_tournaments || 0;
+                document.getElementById('total-decks').textContent = data.total_decks || 0;
+                document.getElementById('total-archetypes').textContent = data.total_archetypes || 0;
+
+                if (data.scraped_at) {
+                    const date = new Date(data.scraped_at);
+                    document.getElementById('last-updated').textContent = date.toLocaleDateString('zh-TW');
+                }
+            } catch (err) {
+                console.error('Error loading overview:', err);
+            }
+        }
+
+        async function loadArchetypes() {
+            try {
+                // Use Chinese API
+                const res = await fetch('/api/archetypes-zh');
+                const data = await res.json();
+
+                // Distribution Chart with Chinese labels
+                const dist = data.distribution;
+                const ctx = document.getElementById('distribution-chart').getContext('2d');
+
+                if (distributionChart) distributionChart.destroy();
+
+                distributionChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: dist.labels || [],
+                        datasets: [{
+                            data: dist.values || [],
+                            backgroundColor: [
+                                '#667eea', '#764ba2', '#e94560', '#0f3460',
+                                '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                                '#06b6d4', '#84cc16', '#6b7280'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#a0a0b0', font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+
+                // Archetype List with Chinese names
+                const listHtml = data.top_archetypes.map((arch, i) => `
+                    <div class="archetype-item" onclick="showDetail('${arch.name_en}', '${arch.name_zh}')">
+                        <div class="archetype-name">
+                            <span class="archetype-rank">${i + 1}</span>
+                            ${arch.name_zh}
+                        </div>
+                        <div class="archetype-stats">
+                            <span>📊 ${arch.deck_count} 副</span>
+                            <span>🏆 ${arch.win_count} 優勝</span>
+                            <span class="win-rate">⚔️ ${arch.win_rate}%</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('archetype-list').innerHTML = listHtml ||
+                    '<div class="empty-state"><h3>目前沒有資料</h3><p>點擊「爬取新資料」開始</p></div>';
+
+            } catch (err) {
+                console.error('Error loading archetypes:', err);
+                // Fallback to English API
+                loadArchetypesEnglish();
+            }
+        }
+
+        async function loadArchetypesEnglish() {
+            try {
+                const res = await fetch('/api/archetypes');
+                const data = await res.json();
+
+                const dist = data.distribution;
+                const ctx = document.getElementById('distribution-chart').getContext('2d');
+
+                if (distributionChart) distributionChart.destroy();
+
+                distributionChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: dist.labels || [],
+                        datasets: [{
+                            data: dist.values || [],
+                            backgroundColor: [
+                                '#667eea', '#764ba2', '#e94560', '#0f3460',
+                                '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                                '#06b6d4', '#84cc16', '#6b7280'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#a0a0b0', font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+
+                const listHtml = data.top_archetypes.map((arch, i) => `
+                    <div class="archetype-item" onclick="showDetail('${arch.name}', '${arch.name}')">
+                        <div class="archetype-name">
+                            <span class="archetype-rank">${i + 1}</span>
+                            ${arch.name}
+                        </div>
+                        <div class="archetype-stats">
+                            <span>📊 ${arch.deck_count} 副</span>
+                            <span>🏆 ${arch.win_count} 優勝</span>
+                            <span class="win-rate">⚔️ ${arch.win_rate}%</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('archetype-list').innerHTML = listHtml ||
+                    '<div class="empty-state"><h3>目前沒有資料</h3><p>點擊「爬取新資料」開始</p></div>';
+            } catch (err) {
+                console.error('Error loading archetypes:', err);
+            }
+        }
+
+        async function loadWinrates() {
+            try {
+                const res = await fetch('/api/winrates');
+                const data = await res.json();
+
+                const chartData = data.chart_data;
+                const ctx = document.getElementById('winrate-chart').getContext('2d');
+
+                if (winrateChart) winrateChart.destroy();
+
+                winrateChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: (chartData.labels || []).slice(0, 10),
+                        datasets: [{
+                            label: '勝率 %',
+                            data: (chartData.win_rates || []).slice(0, 10),
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#a0a0b0' }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: '#a0a0b0', font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Error loading winrates:', err);
+            }
+        }
+
+        async function loadMatchups() {
+            try {
+                // Use Chinese API for translated labels
+                const res = await fetch('/api/matchups-zh?top=8');
+                const data = await res.json();
+
+                const heatmap = data.heatmap;
+
+                if (!heatmap.labels || heatmap.labels.length === 0) {
+                    document.getElementById('matchup-heatmap').innerHTML =
+                        '<div class="empty-state"><h3>沒有對戰資料</h3></div>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th></th>';
+                heatmap.labels.forEach(l => html += `<th>${l.substring(0, 12)}</th>`);
+                html += '</tr></thead><tbody>';
+
+                heatmap.labels.forEach((row, i) => {
+                    html += `<tr><th>${row.substring(0, 12)}</th>`;
+                    heatmap.values[i].forEach((val, j) => {
+                        const hue = val < 50 ? 0 : 120;
+                        const sat = Math.abs(val - 50) * 2;
+                        const bg = i === j ? 'var(--bg-secondary)' :
+                            `hsla(${hue}, ${sat}%, 40%, 0.8)`;
+                        html += `<td style="background: ${bg}">${i === j ? '-' : val}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('matchup-heatmap').innerHTML = html;
+            } catch (err) {
+                console.error('Error loading matchups:', err);
+            }
+        }
+
+        async function loadWeekly() {
+            try {
+                const res = await fetch('/api/tournaments/weekly');
+                const data = await res.json();
+
+                if (!data.weeks || data.weeks.length === 0) {
+                    document.getElementById('weekly-list').innerHTML =
+                        '<div class="empty-state"><h3>沒有每週資料</h3></div>';
+                    return;
+                }
+
+                const html = data.weeks.slice(0, 4).map(week => `
+                    <div class="week-card">
+                        <div class="week-header">
+                            <span class="week-title">${week.week_label}</span>
+                            <span class="week-stats">${week.tournament_count} 場賽事 · ${week.deck_count} 副牌組</span>
+                        </div>
+                        <div class="week-archetypes">
+                            ${week.top_archetypes.slice(0, 5).map(a =>
+                    `<span class="week-archetype-tag">${a.name_zh} (${a.count})</span>`
+                ).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('weekly-list').innerHTML = html;
+            } catch (err) {
+                console.error('Error loading weekly:', err);
+            }
+        }
+
+        async function showDetail(archetypeEn, archetypeZh) {
+            document.getElementById('detail-modal').classList.add('active');
+            document.getElementById('modal-title').textContent = archetypeZh;
+            document.getElementById('modal-body').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                // Use the original name from data which matches API
+                const res = await fetch(`/api/archetype/${encodeURIComponent(archetypeEn)}/detail`);
+                if (!res.ok) {
+                    throw new Error('API error');
+                }
+                const data = await res.json();
+
+                let html = '';
+
+                // Stats
+                if (data.stats) {
+                    html += `
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div class="stat-card">
+                                <h3>參賽數</h3>
+                                <div class="value" style="font-size: 1.5rem;">${data.stats.deck_count}</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>優勝數</h3>
+                                <div class="value" style="font-size: 1.5rem;">${data.stats.win_count}</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>勝率</h3>
+                                <div class="value" style="font-size: 1.5rem;">${data.stats.win_rate}%</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Top 8率</h3>
+                                <div class="value" style="font-size: 1.5rem;">${data.stats.top8_rate}%</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Matchups
+                if (data.matchups) {
+                    if (data.matchups.favorable && data.matchups.favorable.length > 0) {
+                        html += '<div class="matchup-section favorable"><h3>✅ 有利對局</h3>';
+                        data.matchups.favorable.slice(0, 5).forEach(m => {
+                            html += `<div class="matchup-item">
+                                <span>${m.opponent_zh || m.opponent}</span>
+                                <span style="color: var(--success)">${m.winrate}% (${m.matches} 場)</span>
+                            </div>`;
+                        });
+                        html += '</div>';
+                    }
+
+                    if (data.matchups.unfavorable && data.matchups.unfavorable.length > 0) {
+                        html += '<div class="matchup-section unfavorable"><h3>❌ 不利對局</h3>';
+                        data.matchups.unfavorable.slice(0, 5).forEach(m => {
+                            html += `<div class="matchup-item">
+                                <span>${m.opponent_zh || m.opponent}</span>
+                                <span style="color: var(--danger)">${m.winrate}% (${m.matches} 場)</span>
+                            </div>`;
+                        });
+                        html += '</div>';
+                    }
+                }
+
+                // Card Analysis Section
+                if (data.has_card_data && data.card_analysis) {
+                    const ca = data.card_analysis;
+
+                    html += '<div class="card-analysis-section" style="margin-top: 2rem;">';
+                    html += '<h2 style="color: var(--primary); margin-bottom: 1rem;">🃏 卡牌分析</h2>';
+
+                    // ACE SPEC
+                    if (ca.ace_specs && ca.ace_specs.length > 0) {
+                        html += '<div class="analysis-card" style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.1)); border: 1px solid rgba(255,215,0,0.3); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">';
+                        html += '<h3 style="color: gold; margin-bottom: 0.5rem;">⭐ ACE SPEC 選擇</h3>';
+                        html += '<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">';
+                        ca.ace_specs.forEach(c => {
+                            html += `<div style="background: rgba(255,215,0,0.2); padding: 0.5rem 1rem; border-radius: 0.5rem;">
+                                <span style="font-weight: bold;">${c.name}</span>
+                                <span style="color: #aaa; margin-left: 0.5rem;">${c.usage_rate}%</span>
+                            </div>`;
+                        });
+                        html += '</div></div>';
+                    }
+
+                    // Core Cards
+                    if (ca.core_cards && ca.core_cards.length > 0) {
+                        html += '<div class="analysis-card" style="background: rgba(0,255,127,0.05); border: 1px solid rgba(0,255,127,0.2); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">';
+                        html += '<h3 style="color: var(--success); margin-bottom: 0.5rem;">💎 核心卡牌 <small style="color:#888">(使用率≥80%)</small></h3>';
+                        html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;">';
+                        ca.core_cards.slice(0, 12).forEach(c => {
+                            const typeColor = c.card_type === 'Pokemon' ? '#FF6B6B' : c.card_type === 'Trainer' ? '#4ECDC4' : '#FFE66D';
+                            html += `<div style="background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="border-left: 3px solid ${typeColor}; padding-left: 0.5rem;">${c.name}</span>
+                                <span style="color: #888; font-size: 0.85rem;">${c.avg_copies}張 | ${c.usage_rate}%</span>
+                            </div>`;
+                        });
+                        html += '</div></div>';
+                    }
+
+                    // Tech Cards
+                    if (ca.tech_cards && ca.tech_cards.length > 0) {
+                        html += '<div class="analysis-card" style="background: rgba(138,43,226,0.05); border: 1px solid rgba(138,43,226,0.2); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">';
+                        html += '<h3 style="color: #9B59B6; margin-bottom: 0.5rem;">🔧 技術卡牌 <small style="color:#888">(使用率20-80%)</small></h3>';
+                        html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;">';
+                        ca.tech_cards.slice(0, 10).forEach(c => {
+                            const typeColor = c.card_type === 'Pokemon' ? '#FF6B6B' : c.card_type === 'Trainer' ? '#4ECDC4' : '#FFE66D';
+                            html += `<div style="background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="border-left: 3px solid ${typeColor}; padding-left: 0.5rem;">${c.name}</span>
+                                <span style="color: #888; font-size: 0.85rem;">${c.avg_copies}張 | ${c.usage_rate}%</span>
+                            </div>`;
+                        });
+                        html += '</div></div>';
+                    }
+
+                    // Card Type Distribution
+                    if (ca.pokemon || ca.trainers || ca.energy) {
+                        html += '<details style="margin-top: 1rem;"><summary style="cursor: pointer; color: var(--primary);">📊 詳細卡牌分布</summary>';
+                        html += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">';
+
+                        // Pokemon
+                        if (ca.pokemon && ca.pokemon.length > 0) {
+                            html += '<div style="background: rgba(255,107,107,0.1); padding: 1rem; border-radius: 0.5rem;">';
+                            html += '<h4 style="color: #FF6B6B; margin-bottom: 0.5rem;">🔴 寶可夢</h4>';
+                            ca.pokemon.slice(0, 8).forEach(c => {
+                                html += `<div style="font-size: 0.85rem; padding: 0.25rem 0;">${c.name} <span style="color:#888">(${c.avg_copies})</span></div>`;
+                            });
+                            html += '</div>';
+                        }
+
+                        // Trainers
+                        if (ca.trainers && ca.trainers.length > 0) {
+                            html += '<div style="background: rgba(78,205,196,0.1); padding: 1rem; border-radius: 0.5rem;">';
+                            html += '<h4 style="color: #4ECDC4; margin-bottom: 0.5rem;">🟢 訓練家</h4>';
+                            ca.trainers.slice(0, 8).forEach(c => {
+                                html += `<div style="font-size: 0.85rem; padding: 0.25rem 0;">${c.name} <span style="color:#888">(${c.avg_copies})</span></div>`;
+                            });
+                            html += '</div>';
+                        }
+
+                        // Energy
+                        if (ca.energy && ca.energy.length > 0) {
+                            html += '<div style="background: rgba(255,230,109,0.1); padding: 1rem; border-radius: 0.5rem;">';
+                            html += '<h4 style="color: #FFE66D; margin-bottom: 0.5rem;">🟡 能量</h4>';
+                            ca.energy.slice(0, 6).forEach(c => {
+                                html += `<div style="font-size: 0.85rem; padding: 0.25rem 0;">${c.name} <span style="color:#888">(${c.avg_copies})</span></div>`;
+                            });
+                            html += '</div>';
+                        }
+
+                        html += '</div></details>';
+                    }
+
+                    html += '</div>';
+                } else if (!data.has_card_data) {
+                    html += '<div style="margin-top: 2rem; padding: 1rem; background: rgba(255,165,0,0.1); border-radius: 0.5rem; text-align: center;">';
+                    html += '<p style="color: #FFA500;">⚠️ 尚未抓取卡表資料</p>';
+                    html += '<p style="font-size: 0.85rem; color: #888;">執行 <code>uv run python -m src.main scrape --fetch-cards</code> 來獲取卡牌分析</p>';
+                    html += '</div>';
+                }
+
+                // Recent Decks Section
+                if (data.recent_decks && data.recent_decks.length > 0) {
+                    html += '<div class="recent-decks-section" style="margin-top: 2rem;">';
+                    html += '<h2 style="color: var(--primary); margin-bottom: 1rem;">📅 最近上位構築</h2>';
+                    html += '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+
+                    data.recent_decks.forEach(d => {
+                        const placementText = d.placement === 1 ? '🏆 優勝' :
+                            d.placement <= 4 ? `🏅 Top ${d.placement}` :
+                                d.placement ? `Rank ${d.placement}` : '';
+
+                        const placementColor = d.placement === 1 ? '#FFD700' :
+                            d.placement <= 4 ? '#C0C0C0' : '#888';
+
+                        html += `<div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <span style="color: #888; font-size: 0.9rem;">${d.date}</span>
+                                <span style="font-weight: bold; color: ${placementColor}">${placementText}</span>
+                                <span>${d.player_name}</span>
+                            </div>
+                            ${d.deck_url ?
+                                `<a href="${d.deck_url}" target="_blank" style="color: var(--accent); text-decoration: none; padding: 0.25rem 0.75rem; border: 1px solid var(--accent); border-radius: 1rem; font-size: 0.85rem;">查看牌組 ↗</a>` :
+                                '<span style="color: #666; font-size: 0.85rem;">無連結</span>'}
+                        </div>`;
+                    });
+
+                    html += '</div></div>';
+                }
+
+                document.getElementById('modal-body').innerHTML = html || '<p>沒有詳細資料</p>';
+            } catch (err) {
+                document.getElementById('modal-body').innerHTML = '<p>載入失敗</p>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('active');
+        }
+
+        async function refreshData() {
+            location.reload();
+        }
+
+        async function scrapeNew() {
+            if (!confirm('這將從 Limitless TCG 爬取新資料（可能需要幾分鐘）。是否繼續？')) return;
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ 爬取中...';
+
+            try {
+                const res = await fetch('/api/scrape?limit=20');
+                const data = await res.json();
+                alert(`爬取完成！共爬取 ${data.tournaments_scraped} 場賽事。`);
+                location.reload();
+            } catch (err) {
+                alert('爬取錯誤：' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 爬取新資料';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -8,3 +8,4 @@ wheels/
 
 # Virtual environments
 .venv
+PTCG_card_data/

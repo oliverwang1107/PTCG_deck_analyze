@@ -73,6 +73,14 @@ Examples:
         help="Enable debug mode"
     )
     
+    # Cards command (External Tool Integration)
+    cards_parser = subparsers.add_parser("cards", help="Manage local card database (ptcg_tw)")
+    cards_parser.add_argument("card_args", nargs=argparse.REMAINDER, help="Arguments for ptcg_tw tool")
+
+    # Workflow command
+    workflow_parser = subparsers.add_parser("workflow", help="Run full data update workflow")
+    workflow_parser.add_argument("--skip-cards", action="store_true", help="Skip card DB sync")
+    
     args = parser.parse_args()
     
     if args.command == "scrape":
@@ -81,6 +89,10 @@ Examples:
         run_analyze(args)
     elif args.command == "web":
         run_web(args)
+    elif args.command == "cards":
+        run_cards(args)
+    elif args.command == "workflow":
+        run_workflow(args)
     else:
         parser.print_help()
 
@@ -195,6 +207,55 @@ def run_web(args):
     
     print(f"🌐 Starting web interface at http://{args.host}:{args.port}")
     run(host=args.host, port=args.port, debug=args.debug)
+
+
+def run_cards(args):
+    """Run the card database tool."""
+    from .card_db.__main__ import main as card_main
+    
+    # args.card_args is a list of strings, e.g. ['sync', '--db', ...]
+    sys.exit(card_main(args.card_args))
+
+
+def run_workflow(args):
+    """Run the full data update workflow."""
+    print("🚀 Starting Full Data Update Workflow")
+    print("=" * 50)
+    
+    # 1. Sync Card DB (if not skipped)
+    if not args.skip_cards:
+        print("\n[1/3] Syncing Card Database (Official TW)...")
+        from .card_db.__main__ import main as card_main
+        # Default to syncing all regulation marked cards, parallel workers
+        # Using lists=8, workers=4 (default)
+        cmd = ["sync", "--db", "data/ptcg_hij.sqlite", "--regulation-mark", "H,I,J"]
+        try:
+            card_main(cmd)
+        except SystemExit as e:
+            if e.code != 0:
+                print("❌ Card sync failed")
+                return
+        except Exception as e:
+            print(f"❌ Card sync failed: {e}")
+            return
+    else:
+        print("\n[1/3] Skipping Card Database Sync")
+
+    # 2. Scrape Decks
+    print("\n[2/3] Scraping City League Decks (Limitless)...")
+    from .scraper.limitless import LimitlessScraper
+    # Scrape last 20 queries, fetch_cards=True for analysis
+    scraper = LimitlessScraper(cache_dir="data")
+    scraper.scrape_all(tournament_limit=20, fetch_cards=True)
+    
+    # 3. Update Mapping
+    print("\n[3/3] Updating Card Mapping...")
+    from .scraper.mapper import CardMapper
+    mapper = CardMapper()
+    mapper.run()
+    
+    print("\n✅ Workflow Complete!")
+    print("Run 'python -m src.main web' to view results.")
 
 
 if __name__ == "__main__":

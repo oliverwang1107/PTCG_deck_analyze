@@ -404,42 +404,72 @@ class LimitlessScraper:
         Returns:
             Dictionary containing all scraped data
         """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
         print("Starting full scrape...")
         if fetch_cards:
             print("Card list fetching is ENABLED - this will take longer")
         
-        # Get tournament list
+        # Get tournament list (keep sequential as it's just pages)
         tournaments_info = self.get_tournament_list(limit=tournament_limit)
         print(f"Found {len(tournaments_info)} tournaments")
         
-        # Get details for each tournament
+        # Get details for each tournament (Parallel)
         tournaments = []
         total_decks = 0
-        for info in tournaments_info:
-            try:
-                tournament = self.get_tournament_details(info["id"])
-                if tournament:
-                    tournaments.append(tournament)
-                    total_decks += len(tournament.decks)
-            except Exception as e:
-                print(f"Error fetching tournament {info['id']}: {e}")
+        print(f"Fetching {len(tournaments_info)} tournaments details (Parallel)...")
         
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_tid = {
+                executor.submit(self.get_tournament_details, info["id"]): info["id"] 
+                for info in tournaments_info
+            }
+            
+            for future in as_completed(future_to_tid):
+                tid = future_to_tid[future]
+                try:
+                    tournament = future.result()
+                    if tournament:
+                        tournaments.append(tournament)
+                        total_decks += len(tournament.decks)
+                except Exception as e:
+                    print(f"Error fetching tournament {tid}: {e}")
+        
+        # Sort tournaments by date (since parallel fetching messes up order)
+        tournaments.sort(key=lambda x: x.date, reverse=True)
         print(f"Found {total_decks} decks across {len(tournaments)} tournaments")
         
-        # Optionally fetch card lists for each deck
+        # Optionally fetch card lists for each deck (Parallel)
         if fetch_cards:
-            decks_with_url = sum(1 for t in tournaments for d in t.decks if d.deck_url)
-            print(f"Fetching card lists for {decks_with_url} decks with URLs...")
+            decks_to_fetch = []
+            for t in tournaments:
+                for d in t.decks:
+                    if d.deck_url:
+                        decks_to_fetch.append(d)
             
-            fetched = 0
-            for tournament in tournaments:
-                for deck in tournament.decks:
-                    if deck.deck_url:
-                        print(f"  [{fetched+1}/{decks_with_url}] Fetching cards for {deck.archetype}...")
-                        deck.cards = self.get_deck_cards(deck.deck_url)
-                        fetched += 1
+            total_fetches = len(decks_to_fetch)
+            print(f"Fetching card lists for {total_fetches} decks (Parallel)...")
             
-            print(f"Fetched card lists for {fetched} decks")
+            fetched_count = 0
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                # Map future to deck object so we can assign result back
+                future_to_deck = {
+                    executor.submit(self.get_deck_cards, d.deck_url): d 
+                    for d in decks_to_fetch
+                }
+                
+                for future in as_completed(future_to_deck):
+                    deck = future_to_deck[future]
+                    try:
+                        cards = future.result()
+                        deck.cards = cards
+                        fetched_count += 1
+                        if fetched_count % 10 == 0:
+                            print(f"  [{fetched_count}/{total_fetches}] Fetched cards for {deck.archetype}...")
+                    except Exception as e:
+                        print(f"Error fetching cards for deck {deck.deck_url}: {e}")
+            
+            print(f"Fetched card lists for {fetched_count} decks")
         
         # Get metagame data
         metagame = self.get_metagame_data()

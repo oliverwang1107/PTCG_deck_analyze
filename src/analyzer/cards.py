@@ -147,6 +147,13 @@ class CardAnalyzer:
                     card_info["name_zh"] = db_info.get("name_zh")
                     card_info["image_url"] = db_info.get("image_url")
             
+            # Fallback: if still no Chinese name, try hardcoded translations
+            if not card_info.get("name_zh"):
+                from ..translation import translate_card_name
+                translated = translate_card_name(card_name)
+                if translated != card_name:
+                    card_info["name_zh"] = translated
+            
             # Categorize by type
             if stats["card_type"] == "Pokemon":
                 pokemon.append(card_info)

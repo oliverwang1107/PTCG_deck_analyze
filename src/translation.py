@@ -58,6 +58,18 @@ POKEMON_TRANSLATIONS = {
     "honchkrow": "烏鴉頭頭",
     "hydreigon": "三首惡龍",
     
+    # I
+    "iron-bundle": "鐵包袱",
+    "iron-hands": "鐵臂膀",
+    "iron-jugulis": "鐵脖頸",
+    "iron-leaves": "鐵斑葉",
+    "iron-moth": "鐵毒蛾",
+    "iron-thorns": "鐵荊棘",
+    "iron-treads": "鐵轍遺跡",
+    "iron-valiant": "鐵武者",
+    "iron-crown": "鐵頭殼",
+    "iron-boulder": "鐵磐岩",
+
     # J
     "jellicent": "胖嘟嘟",
     
@@ -101,7 +113,22 @@ POKEMON_TRANSLATIONS = {
     "rillaboom": "轟擂金剛猩",
     "roserade": "羅絲雷朵",
     
+    # R
+    "raging-bolt": "怒雷鞭",
+    "regidrago": "雷吉鐸拉戈",
+    "roaring-moon": "轟鳴月",
+    "rillaboom": "轟擂金剛猩",
+    "roserade": "羅絲雷朵",
+    
     # S
+    "sandy-shocks": "沙鐵皮",
+    "scream-tail": "吼叫尾",
+    "slither-wing": "爬地翅",
+    "flutter-mane": "振翼髮",
+    "great-tusk": "雄偉牙",
+    "walking-wake": "波盪水",
+    "gouging-fire": "破空焰",
+    
     "sharpedo": "巨牙鯊",
     "sharpedo-mega": "超級巨牙鯊",
     "slowbro": "呆殼獸",
@@ -129,6 +156,160 @@ POKEMON_TRANSLATIONS = {
     "zoroark": "索羅亞克",
 }
 
+# Common Trainer card translations (English -> Traditional Chinese)
+TRAINER_TRANSLATIONS = {
+    # Supporters
+    "boss's orders": "老大的指令",
+    "cynthia's ambition": "竹蘭的志向",
+    "cynthia's guidance": "竹蘭的指引",
+    "judge": "乙審判",
+    "professor's research": "博士的研究",
+    "professor turo's scenario": "圖魯博士的情境",
+    "professor sada's vitality": "薩瓦博士的活力",
+    "lillie's determination": "莉莉艾的決心",
+    "hilda": "白露",
+    "crispin": "辣椒",
+    "carmine": "赤松",
+    "kieran": "烏栗",
+    "wally's compassion": "小光的同情心",
+    "iono": "奇樹",
+    "arven": "派帕",
+    "penny": "牡丹",
+    "jacq": "吉尼亞",
+    "roxanne": "杜鵑",
+    "serena": "艾嵐",
+    "colress's experiment": "阿克羅馬的實驗",
+    "zinnia's resolve": "紫蘭的決心",
+    "briar": "荊棘",
+    "shauna": "莎莉娜",
+    "n's determination": "N的決心",
+    "clemont's ingenuity": "希特隆的巧思",
+    "hop": "赫普",
+    "leon": "丹帝",
+
+    # Items
+    "ultra ball": "高級球",
+    "nest ball": "巢穴球",
+    "level ball": "等級球",
+    "great ball": "超級球",
+    "master ball": "大師球",
+    "poke ball": "精靈球",
+    "rare candy": "神奇糖果",
+    "buddy-buddy poffin": "好友好友軟糖",
+    "night stretcher": "夜間擔架",
+    "super rod": "高級釣竿",
+    "switch": "替換",
+    "escape rope": "逃脫繩",
+    "air balloon": "氣球",
+    "tool scrapper": "道具清除器",
+    "exp. share": "學習裝置",
+    "choice belt": "講究腰帶",
+    "maximum belt": "極限腰帶",
+    "rescue stretcher": "救援擔架",
+    "counter catcher": "反擊捕手",
+    "pal pad": "好友手帳",
+    "energy recycler": "能量回收機",
+    "energy retrieval": "能量回收",
+    "energy search": "能量搜索",
+    "battle vip pass": "VIP通行證",
+    "earthen vessel": "陶土器皿",
+    "pokegear 3.0": "寶可夢通訊器3.0",
+    "pokemon catcher": "寶可夢捕手",
+    "evolution incense": "進化薰香",
+    "fog crystal": "霧之水晶",
+    "trekking shoes": "登山鞋",
+    "hisuian heavy ball": "洗翠重量球",
+    "artazon": "學園前",
+    "mesagoza": "醬獻市",
+    "iono's voltswitch": "奇樹的伏特替換",
+    "techno radar": "科技雷達",
+    "secret box": "秘密箱",
+    "hyper aroma": "超級薰香",
+    "sparkling crystal": "閃耀水晶",
+    "reboot pod": "重啟艙",
+    "survival brace": "存活護腕",
+    "hero's cape": "英雄披風",
+    "deluxe bomb": "豪華炸彈",
+    "prime catcher": "黃金捕手",
+    "unfair stamp": "不公平印章",
+    "dangerous laser": "危險雷射",
+    "miracle headset": "奇蹟耳機",
+    "giant cape": "巨人披風",
+    "grand tree": "巨大之樹",
+    "amulet of hope": "希望護符",
+    "brilliant blender": "光輝攪拌機",
+    "premium power pro": "進階力量Pro",
+    "bloodmoon ursaluna ex": "赫月月熊ex",
+
+    # Stadiums
+    "temple of sinnoh": "神奧神殿",
+    "lost city": "消失之都",
+    "path to the peak": "頂峰之路",
+    "magenta plaza": "洋紅廣場",
+    "jamming tower": "干擾之塔",
+    "collapsed stadium": "崩壞的競技場",
+    "area zero underdepths": "零區地下",
+
+    # Tools
+    "choice band": "講究頭帶",
+    "defiance vest": "反抗背心",
+    "forest seal stone": "森林封印石",
+    "leftovers": "吃剩的東西",
+
+    # Other
+    "shaymin": "謝米",
+    "latias ex": "拉帝亞斯ex",
+    "riolu": "利歐路",
+    "makuhita": "幕下力士",
+    "ralts": "拉魯拉絲",
+    "kirlia": "奇魯莉安",
+    "dreepy": "多龍梅西亞",
+    "drakloak": "多龍奇",
+    "duskull": "夜巡靈",
+    "dusclops": "彷徨夜靈",
+    "meowth exunreleased": "喵喵ex",
+    "gible": "圓陸鯊",
+    "gabite": "尖牙陸鯊",
+    "roselia": "毒薔薇",
+    "budew": "含羞苞",
+    "grookey": "敲音猴",
+    "scorbunny": "炎兔兒",
+    "raboot": "騰蹴小將",
+    "cinderace": "閃焰王牌",
+}
+
+# Energy card translations (English -> Traditional Chinese)
+ENERGY_TRANSLATIONS = {
+    "grass energy": "草能量",
+    "fire energy": "火能量",
+    "water energy": "水能量",
+    "lightning energy": "雷能量",
+    "psychic energy": "超能量",
+    "fighting energy": "鬥能量",
+    "darkness energy": "惡能量",
+    "metal energy": "鋼能量",
+    "fairy energy": "妖能量",
+    "dragon energy": "龍能量",
+    "colorless energy": "普通能量",
+    "double turbo energy": "雙渦輪能量",
+    "jet energy": "噴射能量",
+    "reversal energy": "逆轉能量",
+    "gift energy": "禮物能量",
+    "legacy energy": "遺產能量",
+    "luminous energy": "光輝能量",
+    "therapeutic energy": "治療能量",
+    "mist energy": "迷霧能量",
+    "neo upper energy": "新上層能量",
+    "basic grass energy": "基本草能量",
+    "basic fire energy": "基本火能量",
+    "basic water energy": "基本水能量",
+    "basic lightning energy": "基本雷能量",
+    "basic psychic energy": "基本超能量",
+    "basic fighting energy": "基本鬥能量",
+    "basic darkness energy": "基本惡能量",
+    "basic metal energy": "基本鋼能量",
+}
+
 
 def translate_pokemon_name(english_name: str) -> str:
     """
@@ -149,6 +330,42 @@ def translate_pokemon_name(english_name: str) -> str:
     # Direct lookup
     if name_lower in POKEMON_TRANSLATIONS:
         return POKEMON_TRANSLATIONS[name_lower]
+    
+    return english_name
+
+
+def translate_card_name(english_name: str) -> str:
+    """
+    Translate any card name (Pokemon, Trainer, or Energy) to Traditional Chinese.
+    
+    Args:
+        english_name: The English name of the card
+    
+    Returns:
+        Traditional Chinese name, or original if not found
+    """
+    if not english_name:
+        return english_name
+    
+    name_lower = english_name.lower().strip()
+    
+    # Try Pokemon translations
+    if name_lower in POKEMON_TRANSLATIONS:
+        return POKEMON_TRANSLATIONS[name_lower]
+    
+    # Try Trainer translations
+    if name_lower in TRAINER_TRANSLATIONS:
+        return TRAINER_TRANSLATIONS[name_lower]
+    
+    # Try Energy translations
+    if name_lower in ENERGY_TRANSLATIONS:
+        return ENERGY_TRANSLATIONS[name_lower]
+    
+    # Handle "X ex" patterns for Pokemon
+    if name_lower.endswith(" ex"):
+        base = name_lower[:-3].strip()
+        if base in POKEMON_TRANSLATIONS:
+            return POKEMON_TRANSLATIONS[base] + "ex"
     
     return english_name
 
@@ -175,3 +392,4 @@ def translate_archetype(archetype: str) -> str:
         translated_parts.append(translated)
     
     return " / ".join(translated_parts)
+

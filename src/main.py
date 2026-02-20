@@ -3,6 +3,7 @@ CLI entry point for PTCG City League Analyzer.
 """
 import argparse
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
@@ -25,7 +26,7 @@ Examples:
     scrape_parser.add_argument(
         "--limit", "-l", 
         type=int, 
-        default=20,
+        default=None,
         help="Maximum number of tournaments to scrape (default: 20)"
     )
     scrape_parser.add_argument(
@@ -38,6 +39,16 @@ Examples:
         "--fetch-cards", "-c",
         action="store_true",
         help="Fetch detailed card lists for each deck (slower, enables card analysis)"
+    )
+    scrape_parser.add_argument(
+        "--days",
+        type=int,
+        help="Scrape tournaments from the last N days"
+    )
+    scrape_parser.add_argument(
+        "--weeks", "-w",
+        type=int,
+        help="Scrape tournaments from the last N weeks (convenience for --days)"
     )
     scrape_parser.add_argument(
         "--update-card-map",
@@ -80,6 +91,11 @@ Examples:
     # Workflow command
     workflow_parser = subparsers.add_parser("workflow", help="Run full data update workflow")
     workflow_parser.add_argument("--skip-cards", action="store_true", help="Skip card DB sync")
+    workflow_parser.add_argument("--days", type=int, default=14, help="Scrape last N days (default: 14)")
+
+    # Stats command
+    stats_parser = subparsers.add_parser("stats", help="Launch statistical analysis dashboard (Streamlit)")
+    stats_parser.add_argument("--port", "-p", type=int, default=8501, help="Port for Streamlit (default: 8501)")
     
     args = parser.parse_args()
     
@@ -93,6 +109,8 @@ Examples:
         run_cards(args)
     elif args.command == "workflow":
         run_workflow(args)
+    elif args.command == "stats":
+        run_stats(args)
     else:
         parser.print_help()
 
@@ -109,18 +127,29 @@ def run_scrape(args):
         if not args.limit and not args.fetch_cards:
             return
 
-    print(f"Starting scrape with limit={args.limit}, delay={args.delay}s, fetch_cards={args.fetch_cards}")
+    today = datetime.now().date()
+    
+    # Calculate days if weeks provided
+    days = args.days
+    if args.weeks:
+        days = args.weeks * 7
+        print(f"Scraping last {args.weeks} weeks ({days} days)...")
+    
+    # Set default limit if nothing else specified
+    limit = args.limit
+    if limit is None and days is None:
+        limit = 20
+        print("No limit or time range specified. Defaulting to latest 20 tournaments.")
+    elif days is not None and limit is None:
+        print(f"Scraping all tournaments from the last {days} days (no limit).")
+
+    print(f"Starting scrape with limit={limit}, days={days}, delay={args.delay}s, fetch_cards={args.fetch_cards}")
     
     scraper = LimitlessScraper(cache_dir="data", delay=args.delay)
-    data = scraper.scrape_all(tournament_limit=args.limit, fetch_cards=args.fetch_cards)
+    data = scraper.scrape_all(tournament_limit=limit, days=days, fetch_cards=args.fetch_cards)
     
     print(f"\n✅ Scrape complete!")
     print(f"   Tournaments: {len(data.get('tournaments', []))}")
-    if data.get('has_card_data'):
-        total_cards = sum(len(d.get('cards', [])) for t in data['tournaments'] for d in t['decks'])
-        print(f"   Card data: Yes ({total_cards} card entries)")
-    print(f"   Saved to: data/scraped_data.json")
-
 
 def run_analyze(args):
     """Run analysis and print summary."""
@@ -216,10 +245,10 @@ def run_cards(args):
     # args.card_args is a list of strings, e.g. ['sync', '--db', ...]
     sys.exit(card_main(args.card_args))
 
-
 def run_workflow(args):
     """Run the full data update workflow."""
     print("🚀 Starting Full Data Update Workflow")
+    print(f"📅 Target: Last {args.days} days")
     print("=" * 50)
     
     # 1. Sync Card DB (if not skipped)
@@ -244,9 +273,9 @@ def run_workflow(args):
     # 2. Scrape Decks
     print("\n[2/3] Scraping City League Decks (Limitless)...")
     from .scraper.limitless import LimitlessScraper
-    # Scrape last 20 queries, fetch_cards=True for analysis
+    # Scrape with days specified, limit=None to get all within range
     scraper = LimitlessScraper(cache_dir="data")
-    scraper.scrape_all(tournament_limit=20, fetch_cards=True)
+    scraper.scrape_all(days=args.days, fetch_cards=True)
     
     # 3. Update Mapping
     print("\n[3/3] Updating Card Mapping...")
@@ -256,6 +285,21 @@ def run_workflow(args):
     
     print("\n✅ Workflow Complete!")
     print("Run 'python -m src.main web' to view results.")
+
+
+def run_stats(args):
+    """Launch statistical analysis Streamlit app."""
+    import subprocess
+    app_path = Path(__file__).parent.parent / "stats_app.py"
+    if not app_path.exists():
+        print(f"❌ stats_app.py not found at {app_path}")
+        return
+    print(f"📐 Launching Statistical Analysis Dashboard on port {args.port}...")
+    subprocess.run([
+        sys.executable, "-m", "streamlit", "run", str(app_path),
+        "--server.port", str(args.port),
+        "--server.headless", "false",
+    ])
 
 
 if __name__ == "__main__":

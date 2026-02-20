@@ -63,7 +63,21 @@ class CardMapper:
                             if len(parts) >= 5:
                                 jp_set = parts[3]
                                 jp_number = parts[4].split('?')[0] # Remove query params if any
-                                found_prints.append({'set': jp_set, 'number': jp_number})
+                                
+                                # Try to find JP official card ID from www.pokemon-card.com links
+                                jp_card_id = None
+                                official_link = current_row.find('a', href=lambda h: h and 'pokemon-card.com' in h)
+                                if official_link:
+                                    # URL format: https://www.pokemon-card.com/card-search/details.php/card/{card_id}/regu/ALL
+                                    import re
+                                    m = re.search(r'/card/(\d+)/', official_link['href'])
+                                    if m:
+                                        jp_card_id = int(m.group(1))
+                                
+                                print_data = {'set': jp_set, 'number': jp_number}
+                                if jp_card_id:
+                                    print_data['jp_card_id'] = jp_card_id
+                                found_prints.append(print_data)
                         
                         current_row = current_row.find_next_sibling('tr')
                         # Stop if we hit a new header or end of table (structure might vary)

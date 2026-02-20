@@ -4,7 +4,7 @@ Limitless TCG Scraper for Japan City League data.
 import json
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
@@ -45,13 +45,27 @@ class LimitlessScraper:
         response.raise_for_status()
         return BeautifulSoup(response.text, "lxml")
     
-    def get_tournament_list(self, page: int = 1, limit: Optional[int] = None) -> list[dict]:
+    def parse_date(self, date_text: str) -> Optional[datetime.date]:
+        """Parse date string from Limitless (e.g., '09 Feb 25')."""
+        try:
+            # Try parsing "DD Mon YY" first (e.g. 09 Feb 25)
+            # Sometimes it might be different, but this is standard for lists
+            return datetime.strptime(date_text, "%d %b %y").date()
+        except ValueError:
+            try:
+                # Fallback or other formats if needed
+                return datetime.strptime(date_text, "%Y-%m-%d").date()
+            except ValueError:
+                return None
+
+    def get_tournament_list(self, page: int = 1, limit: Optional[int] = None, days: Optional[int] = None) -> list[dict]:
         """
         Get list of tournaments from the City League page.
         
         Args:
             page: Page number to fetch
-            limit: Maximum number of tournaments to fetch (across all pages)
+            limit: Maximum number of tournaments to fetch
+            days: Fetch tournaments within the last N days
         
         Returns:
             List of tournament info dictionaries
@@ -59,6 +73,11 @@ class LimitlessScraper:
         tournaments = []
         current_page = page
         seen_ids = set()
+        cutoff_date = None
+        
+        if days:
+            cutoff_date = datetime.now().date() - timedelta(days=days)
+            print(f"Fetching tournaments since {cutoff_date}...")
         
         while True:
             url = f"{self.TOURNAMENTS_URL}?page={current_page}"
@@ -76,26 +95,30 @@ class LimitlessScraper:
                 if match:
                     tournament_id = match.group(1)
                     
-                    # Skip if already seen (links may appear multiple times)
+                    # Skip if already seen
                     if tournament_id in seen_ids:
                         continue
                     seen_ids.add(tournament_id)
                     
-                    # Get text content (usually date)
+                    # Get text content (date)
                     date_text = link.get_text(strip=True)
+                    date_obj = self.parse_date(date_text)
                     
-                    # Try to find location and shop from sibling/parent elements
+                    # Date Check
+                    if days and cutoff_date and date_obj:
+                        if date_obj < cutoff_date:
+                            print(f"Reached date limit: {date_text} is older than {cutoff_date}")
+                            return tournaments
+                    
+                    # Try to find location and shop
                     location = ""
                     shop = ""
-                    
-                    # Look for siblings in the same row
                     parent = link.find_parent("tr")
                     if parent:
                         sibling_links = parent.select("a")
                         for i, sib in enumerate(sibling_links):
                             sib_href = sib.get("href", "")
                             if f"/tournaments/jp/{tournament_id}" in sib_href:
-                                # This is the tournament link, get siblings
                                 if i + 1 < len(sibling_links):
                                     location = sibling_links[i + 1].get_text(strip=True)
                                 if i + 2 < len(sibling_links):
@@ -105,6 +128,7 @@ class LimitlessScraper:
                     tournament = {
                         "id": tournament_id,
                         "date_text": date_text,
+                        "date": date_obj, # Store parsed date
                         "location": location,
                         "shop": shop,
                         "url": urljoin(self.BASE_URL, href)
@@ -119,14 +143,26 @@ class LimitlessScraper:
             if page_tournaments == 0:
                 break
             
-            # Check for next page link
-            next_link = soup.select_one("a[rel='next'], .pagination a:contains('»')")
-            if not next_link or (limit and len(tournaments) >= limit):
-                break
+            # Check for next page
+            pagination = soup.select_one("ul.pagination")
+            if pagination:
+                try:
+                    current = int(pagination.get("data-current", current_page))
+                    max_page = int(pagination.get("data-max", current_page))
+                    
+                    if current < max_page:
+                        current_page += 1
+                    else:
+                        break
+                except ValueError:
+                    break
+            else:
+                # Fallback for old style or if parsing fails
+                next_link = soup.select_one("a[rel='next'], .pagination a:contains('»')")
+                if not next_link:
+                    break
+                current_page += 1
             
-            current_page += 1
-            
-            # Safety limit
             if current_page > 200:
                 break
         
@@ -393,12 +429,13 @@ class LimitlessScraper:
         
         return archetypes
     
-    def scrape_all(self, tournament_limit: Optional[int] = None, fetch_cards: bool = False) -> dict:
+    def scrape_all(self, tournament_limit: Optional[int] = None, days: Optional[int] = None, fetch_cards: bool = False) -> dict:
         """
         Scrape all available data.
         
         Args:
             tournament_limit: Maximum number of tournaments to scrape
+            days: Scrape tournaments from the last N days
             fetch_cards: If True, fetch detailed card lists for each deck (slower)
         
         Returns:
@@ -407,11 +444,14 @@ class LimitlessScraper:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
         print("Starting full scrape...")
+        if days:
+            print(f"Targeting last {days} days of tournaments")
+        
         if fetch_cards:
             print("Card list fetching is ENABLED - this will take longer")
         
         # Get tournament list (keep sequential as it's just pages)
-        tournaments_info = self.get_tournament_list(limit=tournament_limit)
+        tournaments_info = self.get_tournament_list(limit=tournament_limit, days=days)
         print(f"Found {len(tournaments_info)} tournaments")
         
         # Get details for each tournament (Parallel)
@@ -420,20 +460,24 @@ class LimitlessScraper:
         print(f"Fetching {len(tournaments_info)} tournaments details (Parallel)...")
         
         with ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_tid = {
-                executor.submit(self.get_tournament_details, info["id"]): info["id"] 
+            # Pass (id, date) to fetcher or handle date in result
+            future_to_info = {
+                executor.submit(self.get_tournament_details, info["id"]): info 
                 for info in tournaments_info
             }
             
-            for future in as_completed(future_to_tid):
-                tid = future_to_tid[future]
+            for future in as_completed(future_to_info):
+                info = future_to_info[future]
                 try:
                     tournament = future.result()
                     if tournament:
+                        # Ensure date is correct from list info if details didn't have it
+                        if info.get("date"):
+                            tournament.date = info["date"]
                         tournaments.append(tournament)
                         total_decks += len(tournament.decks)
                 except Exception as e:
-                    print(f"Error fetching tournament {tid}: {e}")
+                    print(f"Error fetching tournament {info['id']}: {e}")
         
         # Sort tournaments by date (since parallel fetching messes up order)
         tournaments.sort(key=lambda x: x.date, reverse=True)

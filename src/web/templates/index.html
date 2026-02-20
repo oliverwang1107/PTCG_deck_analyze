@@ -111,16 +111,6 @@
             box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
         }
 
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-hover);
-        }
-
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -135,12 +125,6 @@
             padding: 1.5rem;
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-primary);
-            box-shadow: 0 8px 30px rgba(233, 69, 96, 0.15);
         }
 
         .stat-card h3 {
@@ -190,32 +174,19 @@
             gap: 0.5rem;
         }
 
-        .chart-card h2::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--accent-gradient);
-            border-radius: 2px;
-        }
-
         .chart-container {
             position: relative;
             height: 300px;
         }
 
-        /* Matchup Heatmap */
+        /* Heatmap */
         .heatmap-container {
             grid-column: span 2;
         }
 
-        @media (max-width: 1200px) {
-            .heatmap-container {
-                grid-column: span 1;
-            }
-        }
-
         .heatmap {
             overflow-x: auto;
+            border-radius: 8px;
         }
 
         .heatmap table {
@@ -229,27 +200,31 @@
             padding: 0.5rem;
             text-align: center;
             border: 1px solid var(--border-color);
+            min-width: 50px;
         }
 
         .heatmap th {
             background: var(--bg-secondary);
             font-weight: 500;
             white-space: nowrap;
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
-        .heatmap td {
-            min-width: 50px;
-            font-weight: 600;
-            transition: transform 0.2s ease;
+        .heatmap th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background: var(--bg-secondary);
         }
 
         .heatmap td:hover {
             transform: scale(1.1);
-            z-index: 10;
+            background: var(--bg-hover);
             position: relative;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
         /* Archetype List */
@@ -275,44 +250,20 @@
 
         .archetype-item:hover {
             background: var(--bg-hover);
-            transform: translateX(4px);
-        }
-
-        .archetype-name {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .archetype-rank {
-            width: 28px;
-            height: 28px;
-            background: var(--accent-gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 700;
         }
 
         .archetype-stats {
             display: flex;
             gap: 1.5rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
         }
 
-        .archetype-stats span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .archetype-stats .win-rate {
-            color: var(--success);
-            font-weight: 600;
+        @media (max-width: 768px) {
+            .archetype-stats {
+                gap: 0.5rem;
+                flex-direction: column;
+                align-items: flex-end;
+                font-size: 0.8rem;
+            }
         }
 
         /* Modal */
@@ -323,26 +274,32 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
+            /* Slightly darker */
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .modal.active {
             display: flex;
+            opacity: 1;
         }
 
         .modal-content {
             background: var(--bg-secondary);
             border-radius: 16px;
             padding: 2rem;
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
             border: 1px solid var(--border-color);
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .modal-header {
@@ -352,141 +309,38 @@
             margin-bottom: 1.5rem;
         }
 
-        .modal-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
         .modal-close {
             background: none;
             border: none;
             color: var(--text-secondary);
             font-size: 1.5rem;
             cursor: pointer;
-            transition: color 0.2s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
         }
 
         .modal-close:hover {
-            color: var(--accent-primary);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
         }
 
-        .matchup-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .matchup-section h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .matchup-section.favorable h3 {
-            color: var(--success);
-        }
-
-        .matchup-section.unfavorable h3 {
-            color: var(--danger);
-        }
-
-        .matchup-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        /* Loading */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state h3 {
-            margin-bottom: 1rem;
-        }
-
-        /* Weekly Section */
-        .weekly-section {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-        }
-
-        .week-card {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .week-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .week-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .week-stats {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .week-archetypes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .week-archetype-tag {
-            background: var(--bg-hover);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        /* Card Tooltip */
+        /* Tooltip */
         .card-tooltip {
-            position: absolute;
-            z-index: 1000;
+            position: fixed;
+            /* Fixed is better for viewport-relative */
+            z-index: 2000;
+            /* Higher than modal */
             display: none;
             pointer-events: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
             overflow: hidden;
-            width: 240px;
+            width: 260px;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
         }
@@ -496,300 +350,1340 @@
             display: block;
         }
 
-        .card-item-row {
-            position: relative;
-            cursor: pointer;
-            transition: background 0.2s;
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
         }
 
-        .card-item-row:hover {
-            background: rgba(255, 255, 255, 0.1) !important;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a6a;
+        }
+
+        .week-select {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            margin-right: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--bg-secondary);
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Tier List */
+        .tier-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .tier-label {
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            padding: 1rem;
+        }
+
+        .tier-S {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: #fff;
+        }
+
+        .tier-A {
+            background: linear-gradient(135deg, #f9ca24, #f0932b);
+            color: #1a1a2e;
+        }
+
+        .tier-B {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #fff;
+        }
+
+        .tier-C {
+            background: linear-gradient(135deg, #636e72, #b2bec3);
+            color: #1a1a2e;
+        }
+
+        .tier-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            flex: 1;
+            background: var(--bg-card);
+            align-items: center;
+        }
+
+        .tier-card {
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.2);
+        }
+
+        .tier-card .tc-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .tier-card .tc-score {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Power Rankings Table */
+        .pr-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pr-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pr-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pr-table tr:hover td {
+            background: var(--bg-hover);
+        }
+
+        .pr-table .rank-cell {
+            font-weight: 700;
+            width: 40px;
+            text-align: center;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .tier-badge-S {
+            background: #ee5a24;
+            color: #fff;
+        }
+
+        .tier-badge-A {
+            background: #f0932b;
+            color: #1a1a2e;
+        }
+
+        .tier-badge-B {
+            background: #6c5ce7;
+            color: #fff;
+        }
+
+        .tier-badge-C {
+            background: #636e72;
+            color: #fff;
+        }
+
+        .score-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            overflow: hidden;
+            min-width: 80px;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-gradient);
+            transition: width 0.5s ease;
+        }
+
+        /* Meta Health Gauge */
+        .health-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media(max-width:768px) {
+            .health-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .health-gauge {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .health-gauge svg {
+            transform: rotate(-90deg);
+        }
+
+        .health-gauge circle {
+            fill: none;
+            stroke-width: 12;
+        }
+
+        .health-gauge .bg {
+            stroke: var(--bg-primary);
+        }
+
+        .health-gauge .fg {
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .health-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .health-value .number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .health-value .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .health-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .health-stat {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .health-stat .hs-val {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .health-stat .hs-lbl {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Energy Profile */
+        .energy-bar-container {
+            margin-top: 0.5rem;
+        }
+
+        .energy-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .energy-bar-label {
+            min-width: 60px;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+
+        .energy-bar {
+            flex: 1;
+            height: 18px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .energy-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .energy-bar-pct {
+            min-width: 40px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
     </style>
 </head>
 
-<!-- ... (body content remains same until script) ... -->
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <h1>PTCG City League</h1>
+                <span>Analyzer</span>
+            </div>
+            <div class="header-actions">
+                <select id="week-selector" onchange="handleWeekChange(this.value)" class="week-select">
+                    <option value="">最新資料 (Latest)</option>
+                    <!-- Options injected -->
+                </select>
+                <button class="btn btn-primary" onclick="scrapeNew(event)">📥 爬取新資料</button>
+            </div>
+        </div>
+    </header>
 
-<script>
-    // ... (Charts initialization remains same) ...
+    <div class="container">
+        <!-- Overview Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>賽事數量</h3>
+                <div class="value" id="stat-tournaments">-</div>
+                <div id="stat-tournaments-sub" style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem">
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>牌組數量</h3>
+                <div class="value" id="stat-decks">-</div>
+                <div id="stat-decks-sub" style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem"></div>
+            </div>
+            <div class="stat-card">
+                <h3>牌型種類</h3>
+                <div class="value" id="stat-archetypes">-</div>
+                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem">Window: 2 Weeks</div>
+            </div>
+            <div class="stat-card">
+                <h3>資料時間</h3>
+                <div class="value" id="stat-date" style="font-size: 1.2rem; color: var(--text-secondary);">-</div>
+            </div>
+        </div>
 
-    // Card Tooltip Logic
-    const tooltip = document.createElement('div');
-    tooltip.className = 'card-tooltip';
-    document.body.appendChild(tooltip);
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('overview')">📊 總覽</button>
+            <button class="tab-btn" onclick="switchTab('tierlist')">🏅 Tier List</button>
+            <button class="tab-btn" onclick="switchTab('rankings')">📈 Power Rankings</button>
+            <button class="tab-btn" onclick="switchTab('metatrend')">🌊 Meta 趨勢</button>
+        </div>
 
-    function showCardTooltip(e, imageUrl) {
-        if (!imageUrl) return;
-        tooltip.innerHTML = `<img src="${imageUrl}" alt="Card Image">`;
-        tooltip.style.display = 'block';
-        moveCardTooltip(e);
-    }
+        <!-- TAB: Overview -->
+        <div class="tab-content active" id="tab-overview">
+            <!-- Main Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h2>🏆 勝率排行 (Top 20)</h2>
+                    <div class="chart-container">
+                        <canvas id="chart-winrates"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h2>📊 牌型分布</h2>
+                    <div class="chart-container">
+                        <canvas id="chart-distribution"></canvas>
+                    </div>
+                </div>
+            </div>
 
-    function moveCardTooltip(e) {
-        const x = e.clientX + 20;
-        const y = e.clientY - 100;
-        // Boudnar check
-        const maxY = window.innerHeight - 350;
-
-        tooltip.style.left = `${x}px`;
-        tooltip.style.top = `${Math.min(y, maxY)}px`;
-    }
-
-    function hideCardTooltip() {
-        tooltip.style.display = 'none';
-    }
-
-    // ... (loadOverview etc remains same) ...
-
-    async function showDetail(archetypeEn, archetypeZh) {
-        document.getElementById('detail-modal').classList.add('active');
-        document.getElementById('modal-title').textContent = archetypeZh;
-        document.getElementById('modal-body').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-
-        try {
-            // Use the original name from data which matches API
-            const res = await fetch(`/api/archetype/${encodeURIComponent(archetypeEn)}/detail`);
-            if (!res.ok) {
-                throw new Error('API error');
-            }
-            const data = await res.json();
-
-            let html = '';
-
-            // Stats
-            if (data.stats) {
-                html += `
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-                            <div class="stat-card">
-                                <h3>參賽數</h3>
-                                <div class="value" style="font-size: 1.5rem;">${data.stats.deck_count}</div>
-                            </div>
-                            <div class="stat-card">
-                                <h3>優勝數</h3>
-                                <div class="value" style="font-size: 1.5rem;">${data.stats.win_count}</div>
-                            </div>
-                            <div class="stat-card">
-                                <h3>勝率</h3>
-                                <div class="value" style="font-size: 1.5rem;">${data.stats.win_rate}%</div>
-                            </div>
-                            <div class="stat-card">
-                                <h3>Top 8率</h3>
-                                <div class="value" style="font-size: 1.5rem;">${data.stats.top8_rate}%</div>
+            <!-- Meta Health Gauge -->
+            <div class="chart-card" style="margin-bottom:2rem;">
+                <h2>🩺 環境健康度</h2>
+                <div class="health-container">
+                    <div style="display:flex;align-items:center;justify-content:center;">
+                        <div class="health-gauge">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <circle class="bg" cx="100" cy="100" r="85" />
+                                <circle class="fg" id="health-arc" cx="100" cy="100" r="85" stroke="#10b981"
+                                    stroke-dasharray="534" stroke-dashoffset="534" />
+                            </svg>
+                            <div class="health-value">
+                                <div class="number" id="health-number">—</div>
+                                <div class="label" id="health-label">載入中</div>
                             </div>
                         </div>
-                    `;
+                    </div>
+                    <div class="health-stats">
+                        <div class="health-stat">
+                            <div class="hs-val" id="hs-dominance">—</div>
+                            <div class="hs-lbl">最高佔比 %</div>
+                        </div>
+                        <div class="health-stat">
+                            <div class="hs-val" id="hs-top3">—</div>
+                            <div class="hs-lbl">Top3 集中度 %</div>
+                        </div>
+                        <div class="health-stat">
+                            <div class="hs-val" id="hs-unique">—</div>
+                            <div class="hs-lbl">牌型種類數</div>
+                        </div>
+                        <div class="health-stat">
+                            <div class="hs-val" id="hs-diversity">—</div>
+                            <div class="hs-lbl">Simpson 指數</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matchup Heatmap -->
+            <div class="chart-card heatmap-container" style="margin-bottom: 2rem;">
+                <h2>⚔️ 對戰優劣勢 (勝率 %)</h2>
+                <div class="heatmap" id="heatmap-container">
+                    <!-- Table injected via JS -->
+                </div>
+            </div>
+
+            <!-- Archetype List -->
+            <div class="archetype-list">
+                <h2 style="margin-bottom: 1rem;">🔥 熱門牌組排行 (Window)</h2>
+                <div id="archetype-list">
+                    <!-- List items injected -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Tier List -->
+        <div class="tab-content" id="tab-tierlist">
+            <div class="chart-card" style="margin-bottom:2rem;">
+                <h2 style="margin-bottom:1rem;">🏅 牌組 Tier List</h2>
+                <p style="color:var(--text-secondary);margin-bottom:1.5rem;font-size:0.9rem;">根據使用率 (30%)、勝率 (35%)、Top8率
+                    (20%)、構築一致性 (15%) 計算的綜合評分</p>
+                <div id="tier-list-container">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Power Rankings -->
+        <div class="tab-content" id="tab-rankings">
+            <div class="chart-card" style="margin-bottom:2rem;">
+                <h2 style="margin-bottom:1rem;">📈 Power Rankings</h2>
+                <div style="overflow-x:auto;">
+                    <div id="rankings-container">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Meta Trend -->
+        <div class="tab-content" id="tab-metatrend">
+            <div class="chart-card" style="margin-bottom:2rem;">
+                <h2>🌊 Meta Share 趨勢</h2>
+                <div style="height:400px;"><canvas id="chart-meta-share"></canvas></div>
+            </div>
+
+            <div class="chart-card" style="margin-bottom: 2rem;">
+                <h2>📈 Meta 趨勢變化 (至選定週)</h2>
+                <div class="chart-container">
+                    <canvas id="chart-trends"></canvas>
+                </div>
+            </div>
+
+            <!-- Weekly Stats -->
+            <div class="weekly-section"
+                style="background: var(--bg-card); padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid var(--border-color);">
+                <h2 style="margin-bottom: 1rem; border-left: 4px solid var(--accent-primary); padding-left: 0.5rem;">📅
+                    每週賽事統計</h2>
+                <div id="weekly-container">
+                    <!-- Weekly items will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="detail-modal" onclick="handleModalClick(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Archetype Name</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div id="modal-body">
+                <!-- Detail content injected -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip Element -->
+    <div class="card-tooltip" id="card-tooltip"></div>
+
+    <script>
+        // --- Global Chart Instances ---
+        let chartDist = null;
+        let chartWin = null;
+        let chartTrends = null;
+        let chartMetaShare = null;
+        let currentWeek = ''; // Empty means latest
+        let insightLoaded = false;
+        let metaShareLoaded = false;
+
+        // --- Tab Switching ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.target.classList.add('active');
+            // Lazy-load tab data
+            if ((tabId === 'tierlist' || tabId === 'rankings') && !insightLoaded) loadMetaInsight();
+            if (tabId === 'metatrend' && !metaShareLoaded) loadMetaShareTrend();
+        }
+
+        // --- Navigation & Modal Logic ---
+        window.addEventListener('popstate', (event) => {
+            const modal = document.getElementById('detail-modal');
+            // If we popped a state, and modal is active, it usually means we should close it
+            // Check if we are back to root state (no modal in state)
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                hideCardTooltip();
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+        });
+
+        function handleModalClick(event) {
+            if (event.target.id === 'detail-modal') {
+                closeModal();
+            }
+        }
+
+        function closeModal() {
+            // If state has modal, go back. Otherwise just remove class (failsafe)
+            if (history.state && history.state.modal) {
+                history.back();
+            } else {
+                document.getElementById('detail-modal').classList.remove('active');
+                hideCardTooltip();
+                document.body.style.overflow = '';
+            }
+        }
+
+        // --- Tooltip Logic ---
+        const tooltip = document.getElementById('card-tooltip');
+
+        function showCardTooltip(e, imageUrl) {
+            if (!imageUrl) return;
+            tooltip.innerHTML = `<img src="${imageUrl}" alt="Card Image">`;
+            tooltip.style.display = 'block';
+            moveCardTooltip(e);
+        }
+
+        function moveCardTooltip(e) {
+            // Fixed positioning relative to viewport
+            const x = e.clientX + 20;
+            const y = e.clientY - 100;
+
+            // Boundary checks
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const tooltipWidth = 260; // Approximate
+            const tooltipHeight = 360; // Approximate
+
+            let finalX = x;
+            let finalY = y;
+
+            // Right edge
+            if (x + tooltipWidth > viewportWidth) {
+                finalX = e.clientX - tooltipWidth - 20;
             }
 
-            // Matchups
-            if (data.matchups) {
-                if (data.matchups.favorable && data.matchups.favorable.length > 0) {
-                    html += '<div class="matchup-section favorable"><h3>✅ 有利對局</h3>';
-                    data.matchups.favorable.slice(0, 5).forEach(m => {
-                        html += `<div class="matchup-item">
-                                <span>${m.opponent_zh || m.opponent}</span>
-                                <span style="color: var(--success)">${m.winrate}% (${m.matches} 場)</span>
-                            </div>`;
-                    });
-                    html += '</div>';
-                }
-
-                if (data.matchups.unfavorable && data.matchups.unfavorable.length > 0) {
-                    html += '<div class="matchup-section unfavorable"><h3>❌ 不利對局</h3>';
-                    data.matchups.unfavorable.slice(0, 5).forEach(m => {
-                        html += `<div class="matchup-item">
-                                <span>${m.opponent_zh || m.opponent}</span>
-                                <span style="color: var(--danger)">${m.winrate}% (${m.matches} 場)</span>
-                            </div>`;
-                    });
-                    html += '</div>';
-                }
+            // Bottom edge
+            if (y + tooltipHeight > viewportHeight) {
+                finalY = viewportHeight - tooltipHeight - 20;
             }
 
-            // Card Analysis Section
-            if (data.has_card_data && data.card_analysis) {
-                const ca = data.card_analysis;
+            // Top edge
+            if (finalY < 0) finalY = 10;
 
-                html += '<div class="card-analysis-section" style="margin-top: 2rem;">';
-                html += '<h2 style="color: var(--primary); margin-bottom: 1rem;">🃏 卡牌分析</h2>';
+            tooltip.style.left = `${finalX}px`;
+            tooltip.style.top = `${finalY}px`;
+        }
 
-                // Helper to render card row
-                const renderCard = (c, color) => {
-                    const nameDisplay = c.name_zh ?
-                        `<div>${c.name_zh} <span style="font-size:0.75em; color:#888">(${c.name})</span></div>` :
-                        `<div>${c.name}</div>`;
+        function hideCardTooltip() {
+            tooltip.style.display = 'none';
+            tooltip.innerHTML = ''; // Clear content
+        }
 
-                    const imgAttr = c.image_url ?
-                        `onmouseenter="showCardTooltip(event, '${c.image_url}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
+        // --- Loading Data ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadWeeks(); // Fetch weeks first
+            loadOverview();
+        });
 
-                    return `<div class="card-item-row" ${imgAttr} style="background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display:flex; align-items:center;">
-                                    <span style="border-left: 3px solid ${color}; height: 1.5em; margin-right: 0.5rem;"></span>
-                                    ${nameDisplay}
-                                </div>
-                                <span style="color: #888; font-size: 0.85rem;">${c.avg_copies}張 | ${c.usage_rate}%</span>
-                            </div>`;
-                };
+        async function loadWeeks() {
+            try {
+                const res = await fetch('/api/tournaments/weekly');
+                const data = await res.json();
+                const selector = document.getElementById('week-selector');
 
-                // ACE SPEC
-                if (ca.ace_specs && ca.ace_specs.length > 0) {
-                    html += '<div class="analysis-card" style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.1)); border: 1px solid rgba(255,215,0,0.3); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">';
-                    html += '<h3 style="color: gold; margin-bottom: 0.5rem;">⭐ ACE SPEC 選擇</h3>';
-                    html += '<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">';
-                    ca.ace_specs.forEach(c => {
-                        const imgAttr = c.image_url ?
-                            `onmouseenter="showCardTooltip(event, '${c.image_url}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
+                // Keep the first default option
+                selector.innerHTML = '<option value="">最新資料 (Latest)</option>';
 
-                        html += `<div class="card-item-row" ${imgAttr} style="background: rgba(255,215,0,0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor:pointer;">
-                                <span style="font-weight: bold;">${c.name_zh || c.name}</span>
-                                <span style="color: #aaa; margin-left: 0.5rem;">${c.usage_rate}%</span>
-                            </div>`;
-                    });
-                    html += '</div></div>';
-                }
-
-                // Core Cards
-                if (ca.core_cards && ca.core_cards.length > 0) {
-                    html += '<div class="analysis-card" style="background: rgba(0,255,127,0.05); border: 1px solid rgba(0,255,127,0.2); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">';
-                    html += '<h3 style="color: var(--success); margin-bottom: 0.5rem;">💎 核心卡牌 <small style="color:#888">(使用率≥80%)</small></h3>';
-                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem;">';
-                    ca.core_cards.slice(0, 12).forEach(c => {
-                        const typeColor = c.card_type === 'Pokemon' ? '#FF6B6B' : c.card_type === 'Trainer' ? '#4ECDC4' : '#FFE66D';
-                        html += renderCard(c, typeColor);
-                    });
-                    html += '</div></div>';
-                }
-
-                // Tech Cards
-                if (ca.tech_cards && ca.tech_cards.length > 0) {
-                    html += '<div class="analysis-card" style="background: rgba(138,43,226,0.05); border: 1px solid rgba(138,43,226,0.2); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">';
-                    html += '<h3 style="color: #9B59B6; margin-bottom: 0.5rem;">🔧 技術卡牌 <small style="color:#888">(使用率20-80%)</small></h3>';
-                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem;">';
-                    ca.tech_cards.slice(0, 10).forEach(c => {
-                        const typeColor = c.card_type === 'Pokemon' ? '#FF6B6B' : c.card_type === 'Trainer' ? '#4ECDC4' : '#FFE66D';
-                        html += renderCard(c, typeColor);
-                    });
-                    html += '</div></div>';
-                }
-
-                // Card Type Distribution
-                if (ca.pokemon || ca.trainers || ca.energy) {
-                    html += '<details style="margin-top: 1rem;"><summary style="cursor: pointer; color: var(--primary);">📊 詳細卡牌分布</summary>';
-                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">';
-
-                    // Pokemon
-                    if (ca.pokemon && ca.pokemon.length > 0) {
-                        html += '<div style="background: rgba(255,107,107,0.1); padding: 1rem; border-radius: 0.5rem;">';
-                        html += '<h4 style="color: #FF6B6B; margin-bottom: 0.5rem;">🔴 寶可夢</h4>';
-                        ca.pokemon.slice(0, 8).forEach(c => {
-                            const nameDisplay = c.name_zh ? c.name_zh : c.name;
-                            const imgAttr = c.image_url ?
-                                `onmouseenter="showCardTooltip(event, '${c.image_url}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
-                            html += `<div class="card-item-row" ${imgAttr} style="font-size: 0.85rem; padding: 0.25rem 0;">${nameDisplay} <span style="color:#888">(${c.avg_copies})</span></div>`;
-                        });
-                        html += '</div>';
-                    }
-
-                    // Trainers
-                    if (ca.trainers && ca.trainers.length > 0) {
-                        html += '<div style="background: rgba(78,205,196,0.1); padding: 1rem; border-radius: 0.5rem;">';
-                        html += '<h4 style="color: #4ECDC4; margin-bottom: 0.5rem;">🟢 訓練家</h4>';
-                        ca.trainers.slice(0, 8).forEach(c => {
-                            const nameDisplay = c.name_zh ? c.name_zh : c.name;
-                            const imgAttr = c.image_url ?
-                                `onmouseenter="showCardTooltip(event, '${c.image_url}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
-                            html += `<div class="card-item-row" ${imgAttr} style="font-size: 0.85rem; padding: 0.25rem 0;">${nameDisplay} <span style="color:#888">(${c.avg_copies})</span></div>`;
-                        });
-                        html += '</div>';
-                    }
-
-                    // Energy
-                    if (ca.energy && ca.energy.length > 0) {
-                        html += '<div style="background: rgba(255,230,109,0.1); padding: 1rem; border-radius: 0.5rem;">';
-                        html += '<h4 style="color: #FFE66D; margin-bottom: 0.5rem;">🟡 能量</h4>';
-                        ca.energy.slice(0, 6).forEach(c => {
-                            const nameDisplay = c.name_zh ? c.name_zh : c.name;
-                            const imgAttr = c.image_url ?
-                                `onmouseenter="showCardTooltip(event, '${c.image_url}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
-                            html += `<div class="card-item-row" ${imgAttr} style="font-size: 0.85rem; padding: 0.25rem 0;">${nameDisplay} <span style="color:#888">(${c.avg_copies})</span></div>`;
-                        });
-                        html += '</div>';
-                    }
-
-                    html += '</div></details>';
-                }
-
-                html += '</div>';
-            } else if (!data.has_card_data) {
-                html += '<div style="margin-top: 2rem; padding: 1rem; background: rgba(255,165,0,0.1); border-radius: 0.5rem; text-align: center;">';
-                html += '<p style="color: #FFA500;">⚠️ 尚未抓取卡表資料</p>';
-                html += '<p style="font-size: 0.85rem; color: #888;">執行 <code>uv run python -m src.main scrape --fetch-cards</code> 來獲取卡牌分析</p>';
-                html += '</div>';
-            }
-
-            // Recent Decks Section
-            if (data.recent_decks && data.recent_decks.length > 0) {
-                html += '<div class="recent-decks-section" style="margin-top: 2rem;">';
-                html += '<h2 style="color: var(--primary); margin-bottom: 1rem;">📅 最近上位構築</h2>';
-                html += '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
-
-                data.recent_decks.forEach(d => {
-                    const placementText = d.placement === 1 ? '🏆 優勝' :
-                        d.placement <= 4 ? `🏅 Top ${d.placement}` :
-                            d.placement ? `Rank ${d.placement}` : '';
-
-                    const placementColor = d.placement === 1 ? '#FFD700' :
-                        d.placement <= 4 ? '#C0C0C0' : '#888';
-
-                    html += `<div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <span style="color: #888; font-size: 0.9rem;">${d.date}</span>
-                                <span style="font-weight: bold; color: ${placementColor}">${placementText}</span>
-                                <span>${d.player_name}</span>
-                            </div>
-                            ${d.deck_url ?
-                            `<a href="${d.deck_url}" target="_blank" style="color: var(--accent); text-decoration: none; padding: 0.25rem 0.75rem; border: 1px solid var(--accent); border-radius: 1rem; font-size: 0.85rem;">查看牌組 ↗</a>` :
-                            '<span style="color: #666; font-size: 0.85rem;">無連結</span>'}
-                        </div>`;
+                data.weeks.forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = w.week;
+                    opt.textContent = `${w.week_label}${w.week === data.weeks[0].week ? ' (New)' : ''}`;
+                    selector.appendChild(opt);
                 });
+            } catch (err) {
+                console.error("Error loading weeks:", err);
+            }
+        }
 
-                html += '</div></div>';
+        async function handleWeekChange(val) {
+            currentWeek = val;
+
+            // Show loading state
+            document.body.style.cursor = 'wait';
+            const stats = document.querySelectorAll('.value');
+            stats.forEach(el => el.style.opacity = '0.5');
+
+            await loadOverview();
+
+            // Remove loading state
+            document.body.style.cursor = 'default';
+            stats.forEach(el => el.style.opacity = '1');
+        }
+
+        async function loadOverview() {
+            try {
+                const query = currentWeek ? `?week=${currentWeek}` : '';
+
+                // 1. Overview
+                const resOver = await fetch(`/api/overview${query}`);
+                const dataOver = await resOver.json();
+
+                document.getElementById('stat-tournaments').textContent = dataOver.total_tournaments;
+                // Show breakdown
+                if (dataOver.current_week) {
+                    const currLabel = dataOver.current_week;
+                    const prevLabel = dataOver.prev_week || 'N/A';
+                    document.getElementById('stat-tournaments-sub').innerHTML =
+                        `Current (${currLabel}): ${dataOver.current_week_decks}<br>Prev (${prevLabel}): ${dataOver.prev_week_decks}`;
+                } else {
+                    document.getElementById('stat-tournaments-sub').textContent = '';
+                }
+
+                document.getElementById('stat-decks').textContent = dataOver.total_decks;
+                document.getElementById('stat-archetypes').textContent = dataOver.total_archetypes;
+                document.getElementById('stat-date').textContent = new Date(dataOver.scraped_at).toLocaleDateString();
+
+                // 2. Archetypes (Distribution + List)
+                const resArch = await fetch(`/api/archetypes-zh${query}`); // Use Chinese endpoint
+                const dataArch = await resArch.json();
+                renderDistributionChart(dataArch.distribution);
+                renderArchetypeList(dataArch.top_archetypes);
+
+                // 3. Win Rates
+                const resWin = await fetch(`/api/winrates${query}`);
+                const dataWin = await resWin.json();
+                renderWinRateChart(dataWin.chart_data);
+
+                // 4. Trends
+                const resTrends = await fetch(`/api/trends${query}`);
+                const dataTrends = await resTrends.json();
+                renderTrendsChart(dataTrends.chart_data);
+
+                // 5. Matchups
+                const resMatch = await fetch(`/api/matchups-zh${query}`);
+                const dataMatch = await resMatch.json();
+                renderHeatmap(dataMatch.heatmap, dataMatch.matrix);
+
+                // 6. Weekly (No filter needed, shows all weeks list)
+                const resWeekly = await fetch('/api/tournaments/weekly');
+                const dataWeekly = await resWeekly.json();
+                renderWeeklyStats(dataWeekly.weeks);
+
+                // 7. Meta Health
+                const resInsight = await fetch(`/api/meta-insight${query}`);
+                const dataInsight = await resInsight.json();
+                renderMetaHealth(dataInsight.meta_health);
+
+                // Reset lazy-load flags on week change
+                insightLoaded = false;
+                metaShareLoaded = false;
+
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
+        }
+
+        // --- Chart Rendering Functions ---
+        function renderDistributionChart(data) {
+            const ctx = document.getElementById('chart-distribution').getContext('2d');
+            if (chartDist) chartDist.destroy();
+
+            chartDist = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels, // Translated labels
+                    datasets: [{
+                        data: data.values,
+                        backgroundColor: [
+                            '#e94560', '#0f3460', '#533483', '#16213e', '#e9456088',
+                            '#0f346088', '#53348388', '#16213e88', '#cccccc'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        function renderWinRateChart(data) {
+            const ctx = document.getElementById('chart-winrates').getContext('2d');
+            if (chartWin) chartWin.destroy();
+
+            chartWin = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: '勝率 %',
+                        data: data.win_rates,
+                        backgroundColor: data.colors,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#2a2a4a' }, ticks: { color: '#a0a0b0' } },
+                        x: { grid: { display: false }, ticks: { color: '#a0a0b0' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderTrendsChart(data) {
+            const ctx = document.getElementById('chart-trends').getContext('2d');
+            if (chartTrends) chartTrends.destroy();
+
+            chartTrends = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: data.datasets.map(ds => ({
+                        ...ds,
+                        tension: 0.4,
+                        pointRadius: 3
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#2a2a4a' }, ticks: { color: '#a0a0b0' } },
+                        x: { grid: { color: '#2a2a4a' }, ticks: { color: '#a0a0b0' } }
+                    },
+                    plugins: { legend: { labels: { color: '#fff' } } }
+                }
+            });
+        }
+
+        function renderHeatmap(heatmapData, matrix) {
+            const container = document.getElementById('heatmap-container');
+            const labels = heatmapData.labels; // Translated
+            const values = heatmapData.values; // 2D array of win rates
+
+            if (!labels || labels.length === 0 || !values || values.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#666;padding:2rem">無對戰資料</div>';
+                return;
             }
 
-            document.getElementById('modal-body').innerHTML = html || '<p>沒有詳細資料</p>';
-        } catch (err) {
-            console.error(err);
-            document.getElementById('modal-body').innerHTML = '<p>載入失敗: ' + err.message + '</p>';
+            let html = '<table><thead><tr><th>對手</th>';
+            labels.forEach(l => html += `<th>${l}</th>`);
+            html += '</tr></thead><tbody>';
+
+            labels.forEach((rowLabel, i) => {
+                html += `<tr><th>${rowLabel}</th>`;
+                labels.forEach((colLabel, j) => {
+                    if (i === j) {
+                        html += '<td style="background:#2a2a4a">-</td>';
+                    } else {
+                        const winRate = values[i][j];
+                        let color = 'transparent';
+                        if (winRate > 55) color = `rgba(16, 185, 129, ${(winRate - 50) / 50})`; // Greenish
+                        else if (winRate < 45) color = `rgba(239, 68, 68, ${(50 - winRate) / 50})`; // Reddish
+                        html += `<td style="background:${color}">${winRate !== null ? winRate + '%' : '-'}</td>`;
+                    }
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
         }
-    }
 
-    function closeModal() {
-        document.getElementById('detail-modal').classList.remove('active');
-    }
-
-    async function refreshData() {
-        location.reload();
-    }
-
-    async function scrapeNew() {
-        if (!confirm('這將從 Limitless TCG 爬取新資料（可能需要幾分鐘）。是否繼續？')) return;
-
-        const btn = event.target;
-        btn.disabled = true;
-        btn.textContent = '⏳ 爬取中...';
-
-        try {
-            const res = await fetch('/api/scrape?limit=20');
-            const data = await res.json();
-            alert(`爬取完成！共爬取 ${data.tournaments_scraped} 場賽事。`);
-            location.reload();
-        } catch (err) {
-            alert('爬取錯誤：' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.textContent = '📥 爬取新資料';
+        function renderArchetypeList(list) {
+            const container = document.getElementById('archetype-list');
+            container.innerHTML = list.map((item, index) => `
+            <div class="archetype-item" onclick="showDetail('${item.name_en}', '${item.name_zh}')">
+                <div class="archetype-name">
+                    <div class="archetype-rank">${index + 1}</div>
+                    ${item.name_zh} <span style="font-size:0.8em; color:#666">(${item.name_en})</span>
+                </div>
+                <div class="archetype-stats">
+                    <span class="win-rate">🏆 ${item.win_rate}%</span>
+                    <span>🎮 ${item.deck_count}</span>
+                    <span>🔝 ${item.top8_rate}%</span>
+                </div>
+            </div>
+        `).join('');
         }
-    }
-</script>
+
+        function renderWeeklyStats(weeks) {
+            const container = document.getElementById('weekly-container');
+            if (!weeks || weeks.length === 0) {
+                container.innerHTML = '<div class="empty-state">無每週資料</div>';
+                return;
+            }
+
+            container.innerHTML = weeks.map(week => {
+                const tags = week.top_archetypes.map(a =>
+                    `<span class="week-archetype-tag">${a.name_zh} (${a.count})</span>`
+                ).join('');
+
+                return `
+            <div class="week-card">
+                <div class="week-header">
+                    <div class="week-title">${week.week_label}</div>
+                    <div class="week-stats">${week.tournament_count} 場賽事 • ${week.deck_count} 副牌組</div>
+                </div>
+                <div class="week-archetypes">
+                    ${tags}
+                </div>
+            </div>
+            `;
+            }).join('');
+        }
+
+        // --- Modal Logic ---
+        async function showDetail(archetypeEn, archetypeZh) {
+            const modal = document.getElementById('detail-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            // Push state for back button support
+            history.pushState({ modal: true, id: archetypeEn }, '', `#deck-${archetypeEn}`);
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            title.textContent = archetypeZh;
+            body.innerHTML = '<div class="loading"><div class="spinner"></div><p style="text-align:center;color:#666">載入分析資料中...</p></div>';
+
+            try {
+                const query = currentWeek ? `?week=${currentWeek}` : '';
+                const res = await fetch(`/api/archetype/${encodeURIComponent(archetypeEn)}/detail${query}`);
+                const data = await res.json();
+
+                // Build Modal HTML
+                let html = '';
+
+                // 1. Stats Grid
+                html += `
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                     <div class="stat-card"><h3>參賽數</h3><div class="value" style="font-size:1.5rem">${data.stats.deck_count}</div></div>
+                     <div class="stat-card"><h3>優勝數</h3><div class="value" style="font-size:1.5rem">${data.stats.win_count}</div></div>
+                     <div class="stat-card"><h3>勝率</h3><div class="value" style="font-size:1.5rem">${data.stats.win_rate}%</div></div>
+                     <div class="stat-card"><h3>Top8率</h3><div class="value" style="font-size:1.5rem">${data.stats.top8_rate}%</div></div>
+                </div>
+            `;
+
+                // 2. Deep Analysis
+                if (data.has_card_data && data.deep_analysis) {
+                    const da = data.deep_analysis;
+
+                    // Consensus Score
+                    let scoreColor = '#ef4444';
+                    if (da.consensus_score > 0.7) scoreColor = '#10b981';
+                    else if (da.consensus_score > 0.4) scoreColor = '#f59e0b';
+
+                    html += `
+                    <div style="background:var(--bg-card); padding:1.5rem; border-radius:12px; margin-bottom:2rem; border:1px solid var(--border-color)">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                            <h2 style="margin:0">🧬 深度分析</h2>
+                            <div style="text-align:right">
+                                <span style="color:var(--text-secondary); font-size:0.9rem">構築同質性</span>
+                                <div style="font-size:1.5rem; font-weight:bold; color:${scoreColor}">${(da.consensus_score * 100).toFixed(0)}%</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Trends Charts -->
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem">
+                            <div>
+                                <h4 style="margin-bottom:0.5rem; color:var(--text-secondary)">Tech 卡趨勢</h4>
+                                <div style="height:200px"><canvas id="chart-tech-trends"></canvas></div>
+                            </div>
+                            <div>
+                                <h4 style="margin-bottom:0.5rem; color:var(--text-secondary)">ACE SPEC 演變</h4>
+                                <div style="height:200px"><canvas id="chart-ace-trends"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                } else if (data.deep_analysis) {
+                    // Show message if deep analysis structure exists but no card data
+                    html += `
+                    <div style="background:var(--bg-card); padding:1.5rem; border-radius:12px; margin-bottom:2rem; border:1px dashed var(--border-color); text-align:center; color:var(--text-secondary)">
+                        <h2 style="margin-top:0; color:var(--text-primary)">🧬 深度分析</h2>
+                        <p>⚠️ 無法顯示構築分析數據</p>
+                        <p style="font-size:0.9rem">請使用 <code>--fetch-cards</code> (及 <code>--weeks</code>) 參數重新爬取資料以啟用此功能。</p>
+                    </div>
+                    `;
+                }
+
+                // Energy Profile
+                if (data.energy_profile) {
+                    html += renderEnergyProfile(data.energy_profile);
+                }
+
+                // 3. Card Analysis
+                if (data.has_card_data && data.card_analysis) {
+                    const ca = data.card_analysis;
+                    html += '<h2 style="margin-bottom:1rem; color:var(--accent-primary)">🃏 卡牌分析</h2>';
+
+                    // ACE SPEC
+                    if (ca.ace_specs && ca.ace_specs.length > 0) {
+                        html += '<div style="background:rgba(255,215,0,0.1); padding:1rem; border-radius:12px; margin-bottom:1rem; border:1px solid rgba(255,215,0,0.3)">';
+                        html += '<h3 style="color:#ffd700; margin-bottom:0.5rem">⭐ ACE SPEC 選擇</h3><div style="display:flex; flex-wrap:wrap; gap:0.5rem">';
+                        ca.ace_specs.forEach(c => {
+                            const img = c.image_url ? `onmouseenter="showCardTooltip(event, '${c.image_url}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
+                            const name = c.name_zh || c.name;
+                            html += `<div ${img} style="background:rgba(0,0,0,0.3); padding:0.5rem 1rem; border-radius:8px; cursor:pointer;">${name} <span style="color:#aaa">${c.usage_rate}%</span></div>`;
+                        });
+                        html += '</div></div>';
+                    }
+
+                    // Core Cards
+                    html += renderCardSection('💎 核心卡牌 (使用率 ≥ 80%)', '#10b981', ca.core_cards);
+                    // Tech Cards
+                    html += renderCardSection('🔧 技術卡牌 (使用率 20-80%)', '#a855f7', ca.tech_cards);
+                }
+
+                // 3. Matchups
+                if (data.matchups) {
+                    html += '<div style="margin-top:2rem"><h2 style="margin-bottom:1rem">⚔️ 對戰優劣</h2>';
+                    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">';
+
+                    // Favorable
+                    html += '<div><h3 style="color:var(--success); margin-bottom:0.5rem">✅ 有利</h3>';
+                    (data.matchups.favorable || []).slice(0, 5).forEach(m => {
+                        html += `<div style="display:flex; justify-content:space-between; padding:0.5rem; border-bottom:1px solid var(--border-color)">
+                        <span>${m.opponent_zh || m.opponent}</span><span style="color:var(--success)">${m.winrate}%</span></div>`;
+                    });
+                    html += '</div>';
+
+                    // Unfavorable
+                    html += '<div><h3 style="color:var(--danger); margin-bottom:0.5rem">❌ 不利</h3>';
+                    (data.matchups.unfavorable || []).slice(0, 5).forEach(m => {
+                        html += `<div style="display:flex; justify-content:space-between; padding:0.5rem; border-bottom:1px solid var(--border-color)">
+                        <span>${m.opponent_zh || m.opponent}</span><span style="color:var(--danger)">${m.winrate}%</span></div>`;
+                    });
+                    html += '</div></div></div>';
+                }
+
+                // 4. Recent Decks
+                if (data.recent_decks && data.recent_decks.length > 0) {
+                    html += '<div style="margin-top:2rem"><h2 style="margin-bottom:1rem">📅 最近上位牌組 (Recent 50)</h2>';
+                    html += '<div style="max-height: 300px; overflow-y: auto; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">';
+
+                    data.recent_decks.forEach(d => {
+                        const date = new Date(d.date).toLocaleDateString();
+                        const placement = d.placement ? `#${d.placement}` : '-';
+                        const deckLink = d.deck_url ? `<a href="${d.deck_url}" target="_blank" style="color:var(--accent-primary); text-decoration:none;">🔗 牌組連結</a>` : '';
+
+                        html += `
+                        <div style="display:grid; grid-template-columns: 2fr 3fr 1fr 1fr 1fr; gap:1rem; padding:0.75rem 1rem; border-bottom:1px solid var(--border-color); align-items:center; font-size:0.9rem;">
+                            <span style="color:var(--text-secondary)">${date}</span>
+                            <span style="font-weight:500">${d.tournament}</span>
+                            <span>${d.player_name}</span>
+                            <span style="font-weight:bold; color:${d.placement <= 4 ? 'var(--accent-primary)' : 'inherit'}">${placement}</span>
+                            <div style="text-align:right">${deckLink}</div>
+                        </div>`;
+                    });
+
+                    html += '</div></div>';
+                }
+
+                body.innerHTML = html;
+
+                // Render Deep Analysis Charts
+                if (data.deep_analysis) {
+                    if (data.deep_analysis.tech_trends) {
+                        renderTrendLineChart('chart-tech-trends', data.deep_analysis.tech_trends);
+                    }
+                    if (data.deep_analysis.ace_spec_trends) {
+                        renderTrendLineChart('chart-ace-trends', data.deep_analysis.ace_spec_trends);
+                    }
+                }
+
+            } catch (e) {
+                console.error(e);
+                body.innerHTML = `<p style="color:red">Error loading details: ${e.message}</p>`;
+            }
+        }
+
+        function renderTrendLineChart(canvasId, trendsData) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+
+            // Generate distinct colors
+            const colors = [
+                '#e94560', '#667eea', '#f59e0b', '#10b981', '#a855f7',
+                '#06b6d4', '#ec4899', '#8b5cf6', '#f97316', '#14b8a6'
+            ];
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendsData.weeks,
+                    datasets: (trendsData.datasets || []).map((ds, i) => ({
+                        label: ds.label,
+                        data: ds.data,
+                        borderColor: colors[i % colors.length],
+                        backgroundColor: colors[i % colors.length],
+                        tension: 0.3,
+                        pointRadius: 2,
+                        borderWidth: 2
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#2a2a4a' },
+                            ticks: { color: '#a0a0b0', callback: v => v + '%' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0a0b0', maxTicksLimit: 5 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#fff', boxWidth: 10, font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCardSection(title, color, cards) {
+            if (!cards || cards.length === 0) return '';
+            let html = `<div style="background:${color}11; padding:1rem; border-radius:12px; margin-bottom:1rem; border:1px solid ${color}33">`;
+            html += `<h3 style="color:${color}; margin-bottom:0.5rem">${title}</h3>`;
+            html += '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:0.5rem">';
+
+            cards.slice(0, 12).forEach(c => {
+                // Safe quote escaping for tooltip
+                const safeUrl = c.image_url ? c.image_url.replace(/'/g, "\\'") : '';
+                const img = safeUrl ? `onmouseenter="showCardTooltip(event, '${safeUrl}')" onmousemove="moveCardTooltip(event)" onmouseleave="hideCardTooltip()"` : '';
+
+                const name = c.name_zh || c.name;
+                html += `<div ${img} style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:0.5rem; border-radius:6px; cursor:pointer;" class="card-item-row">
+                <span>${name}</span>
+                <span style="color:#888; font-size:0.9em">${c.avg_copies}張 | ${c.usage_rate}%</span>
+             </div>`;
+            });
+            html += '</div></div>';
+            return html;
+        }
+
+        // --- Meta Insight Loading ---
+        async function loadMetaInsight() {
+            try {
+                const query = currentWeek ? `?week=${currentWeek}` : '';
+                const res = await fetch(`/api/meta-insight${query}`);
+                const data = await res.json();
+                renderTierList(data.tier_list, data.scoring_method);
+                renderPowerRankings(data.power_rankings, data.scoring_method);
+                insightLoaded = true;
+            } catch (e) { console.error('Meta insight error:', e); }
+        }
+
+        async function loadMetaShareTrend() {
+            try {
+                const query = currentWeek ? `?week=${currentWeek}` : '';
+                const res = await fetch(`/api/meta-share-trend${query}`);
+                const data = await res.json();
+                renderMetaShareChart(data);
+                metaShareLoaded = true;
+            } catch (e) { console.error('Meta share trend error:', e); }
+        }
+
+        function renderTierList(tiers, method) {
+            const container = document.getElementById('tier-list-container');
+            const w = method ? method.weights : {};
+            let html = `<div style="background:var(--bg-secondary);padding:1rem;border-radius:10px;margin-bottom:1.5rem;font-size:0.85rem;color:var(--text-secondary)">
+                <strong>ℹ️ 評分方法：</strong>${method ? method.description : ''}<br>
+                勝率 ${(w.win_rate || 0) * 100}% + Top Cut ${(w.top_cut || 0) * 100}% + 使用率 ${(w.usage || 0) * 100}%<br>
+                <strong>Tier 分級：</strong>${method ? method.tier_rules : ''}
+            </div>`;
+            ['S', 'A', 'B', 'C'].forEach(tier => {
+                const items = tiers[tier] || [];
+                html += `<div class="tier-row"><div class="tier-label tier-${tier}">${tier}</div><div class="tier-items">`;
+                if (items.length === 0) {
+                    html += '<span style="color:var(--text-secondary);font-size:0.85rem">—</span>';
+                } else {
+                    items.forEach(item => {
+                        const name = item.name_zh || item.name;
+                        html += `<div class="tier-card" onclick="showDetail('${item.name}','${name}')">
+                            <div class="tc-name">${name}</div>
+                            <div class="tc-score">⚡ ${item.power_score} | 🎮 ${item.deck_count}</div>
+                        </div>`;
+                    });
+                }
+                html += '</div></div>';
+            });
+            container.innerHTML = html;
+        }
+
+        function renderPowerRankings(rankings, method) {
+            const container = document.getElementById('rankings-container');
+            const w = method ? method.weights : {};
+            let html = `<div style="background:var(--bg-secondary);padding:1rem;border-radius:10px;margin-bottom:1rem;font-size:0.85rem;color:var(--text-secondary)">
+                <strong>ℹ️ 評分公式：</strong>每個指標在所有符合條件的牌組中計算百分位排名 (0–100)，再以下列權重加權平均：<br>
+                🏆 勝率 ${(w.win_rate || 0) * 100}% &nbsp;•&nbsp; 🎖️ Top Cut ${(w.top_cut || 0) * 100}% &nbsp;•&nbsp; 📊 使用率 ${(w.usage || 0) * 100}%<br>
+                <em>Top Cut = (優勝×3 + Top4×2 + Top8×1) / (總套數×3) 的加權總結</em>
+            </div>`;
+            html += `<table class="pr-table"><thead><tr>
+                <th>#</th><th>牌組</th><th>Tier</th><th>Power Score</th>
+                <th>勝率 P%</th><th>Top Cut P%</th><th>使用率 P%</th><th>套數</th><th>優勝</th>
+            </tr></thead><tbody>`;
+            rankings.forEach(r => {
+                const name = r.name_zh || r.name;
+                html += `<tr onclick="showDetail('${r.name}','${name}')" style="cursor:pointer">
+                    <td class="rank-cell">${r.rank}</td>
+                    <td style="font-weight:600">${name} <span style="color:#666;font-size:0.8em">(${r.name})</span></td>
+                    <td><span class="tier-badge tier-badge-${r.tier}">${r.tier}</span></td>
+                    <td><div class="score-bar"><div class="score-bar-fill" style="width:${r.power_score}%"></div></div>
+                        <span style="font-size:0.8rem;color:var(--text-secondary)">${r.power_score}</span></td>
+                    <td>${r.pct_winrate}</td>
+                    <td>${r.pct_topcut}</td>
+                    <td>${r.pct_usage}</td>
+                    <td>${r.deck_count}</td>
+                    <td>${r.win_count}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderMetaHealth(health) {
+            if (!health) return;
+            const pct = Math.round(health.diversity_index * 100);
+            const circumference = 2 * Math.PI * 85; // ~534
+            const offset = circumference * (1 - health.diversity_index);
+            const arc = document.getElementById('health-arc');
+            // Color based on score
+            let color = '#ef4444';
+            if (pct >= 85) color = '#10b981';
+            else if (pct >= 70) color = '#22d3ee';
+            else if (pct >= 50) color = '#f59e0b';
+            arc.setAttribute('stroke', color);
+            setTimeout(() => { arc.style.strokeDashoffset = offset; }, 100);
+            document.getElementById('health-number').textContent = pct + '%';
+            document.getElementById('health-number').style.color = color;
+            document.getElementById('health-label').textContent = health.label;
+            document.getElementById('hs-dominance').textContent = health.dominance_pct + '%';
+            document.getElementById('hs-top3').textContent = health.top3_concentration + '%';
+            document.getElementById('hs-unique').textContent = health.unique_archetypes;
+            document.getElementById('hs-diversity').textContent = health.diversity_index;
+        }
+
+        function renderMetaShareChart(data) {
+            if (!data || !data.weeks || data.weeks.length === 0) return;
+            const ctx = document.getElementById('chart-meta-share').getContext('2d');
+            if (chartMetaShare) chartMetaShare.destroy();
+            const colors = ['#e94560', '#667eea', '#f59e0b', '#10b981', '#a855f7', '#06b6d4', '#ec4899', '#8b5cf6', '#636e72'];
+            const datasets = data.archetypes.map((arch, i) => ({
+                label: arch.name_zh || arch.name,
+                data: arch.shares,
+                backgroundColor: colors[i % colors.length] + '88',
+                borderColor: colors[i % colors.length],
+                borderWidth: 1,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 0
+            }));
+            chartMetaShare = new Chart(ctx, {
+                type: 'line',
+                data: { labels: data.weeks, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { stacked: true, beginAtZero: true, max: 100, grid: { color: '#2a2a4a' }, ticks: { color: '#a0a0b0', callback: v => v + '%' } },
+                        x: { grid: { color: '#2a2a4a' }, ticks: { color: '#a0a0b0', maxTicksLimit: 10 } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#fff', boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { mode: 'index', callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } }
+                    }
+                }
+            });
+        }
+
+        function renderEnergyProfile(profileData) {
+            if (!profileData || !profileData.types || Object.keys(profileData.types).length === 0) return '';
+            const energyColors = { Fire: '#e94560', Water: '#3b82f6', Electric: '#f59e0b', Grass: '#10b981', Psychic: '#a855f7', Dark: '#374151', Fighting: '#dc7633', Metal: '#95a5a6', Dragon: '#f0932b', Colorless: '#d1d5db' };
+            let html = `<div style="background:var(--bg-card);padding:1.5rem;border-radius:12px;margin-bottom:2rem;border:1px solid var(--border-color)">
+                <h2 style="margin:0 0 0.5rem">⚡ 能量構成 <span style="font-size:0.8rem;color:var(--text-secondary)">平均 ${profileData.avg_energy_count} 張能量</span></h2>
+                <div class="energy-bar-container">`;
+            for (const [type, pct] of Object.entries(profileData.types)) {
+                const color = energyColors[type] || '#888';
+                html += `<div class="energy-bar-row">
+                    <span class="energy-bar-label">${type}</span>
+                    <div class="energy-bar"><div class="energy-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+                    <span class="energy-bar-pct">${pct}%</span>
+                </div>`;
+            }
+            html += '</div></div>';
+            return html;
+        }
+
+        async function scrapeNew(e) {
+            if (!confirm('確定要執行新資料爬取嗎？')) return;
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ 處理中...';
+            try {
+                const res = await fetch('/api/scrape?limit=10');
+                const d = await res.json();
+                alert('更新完成！');
+                location.reload();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 爬取新資料';
+            }
+        }
+    </script>
 </body>
 
 </html>

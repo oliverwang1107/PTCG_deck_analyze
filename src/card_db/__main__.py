@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,6 +28,11 @@ from .scraper import (
     fetch_list_page,
     parse_card_detail_html,
     start_search,
+)
+from .jp_scraper import (
+    build_jp_session,
+    fetch_jp_detail_html,
+    parse_jp_card_detail_html,
 )
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -487,6 +493,138 @@ def cmd_llm_effects(args: argparse.Namespace) -> int:
     return 0
 
 
+def _fetch_one_jp(card_id: int, delay: float, allowed_marks: set[str] | None, verbose: bool) -> FetchResult:
+    """Fetch a single JP card. Returns FetchResult with card/skills or error."""
+    try:
+        session = build_jp_session()
+        # Add delay before request (no global lock needed)
+        if delay > 0:
+            time.sleep(delay)
+        
+        # Simplified fetch without RateLimiter
+        url = f"https://www.pokemon-card.com/card-search/details.php/card/{card_id}/regu/ALL"
+        resp = session.get(url, timeout=10, allow_redirects=True)
+        
+        # Check if redirected away from detail page
+        final_url = str(resp.url)
+        if "details.php" not in final_url and "detail" not in final_url:
+            return FetchResult(card_id=card_id, error="not_found_or_redirected")
+        
+        html = resp.text
+        card, skills = parse_jp_card_detail_html(card_id, html)
+        
+        # Filter by regulation mark if specified
+        if allowed_marks is not None:
+            mark = (card.get("regulation_mark") or "").strip().upper()
+            if mark and mark not in allowed_marks:
+                return FetchResult(card_id=card_id, error=f"regulation_{mark}")
+        
+        return FetchResult(card_id=card_id, card=card, skills=skills)
+    except Exception as e:  # noqa: BLE001
+        return FetchResult(card_id=card_id, error=str(e))
+
+
+def cmd_sync_jp(args: argparse.Namespace) -> int:
+    """Sync JP card data from www.pokemon-card.com using mapping file or ID range."""
+    db_path = Path(args.db)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = dbmod.connect(db_path)
+    dbmod.init_db(conn)
+
+    jp_card_ids: list[int] = []
+
+    # Mode 1: Scan ID range
+    if args.scan_range:
+        try:
+            start, end = map(int, args.scan_range.split('-'))
+            jp_card_ids = list(range(start, end + 1))
+            print(f"Scanning ID range: {start} to {end} ({len(jp_card_ids)} IDs)", file=sys.stderr)
+        except ValueError:
+            print(f"Invalid --scan-range format. Use: START-END (e.g., 40000-50000)", file=sys.stderr)
+            return 1
+
+    # Mode 2: Use mapping file (original method)
+    else:
+        map_path = Path(args.map)
+        if not map_path.exists():
+            print(f"Mapping file not found: {map_path}", file=sys.stderr)
+            print(f"Hint: Use --scan-range START-END to scan by ID range", file=sys.stderr)
+            return 1
+
+        # Load mapping to get JP card IDs
+        with open(map_path, "r", encoding="utf-8") as f:
+            mapping = json.load(f)
+
+        jp_card_id_set: set[int] = set()
+        for limitless_id, jp_info in mapping.items():
+            if isinstance(jp_info, dict) and "jp_card_id" in jp_info:
+                jp_card_id_set.add(int(jp_info["jp_card_id"]))
+
+        if not jp_card_id_set:
+            print("No JP card IDs found in mapping file.", file=sys.stderr)
+            print(f"Hint: Use --scan-range START-END to scan by ID range", file=sys.stderr)
+            return 1
+
+        jp_card_ids = sorted(jp_card_id_set)
+
+    existing = dbmod.get_existing_card_ids(conn) if args.skip_existing else set()
+    to_fetch = [cid for cid in jp_card_ids if cid not in existing]
+    if args.limit is not None:
+        to_fetch = to_fetch[: int(args.limit)]
+
+    print(
+        f"discovered={len(jp_card_ids)} existing={len(existing)} to_fetch={len(to_fetch)}",
+        file=sys.stderr,
+    )
+    if not to_fetch:
+        return 0
+
+    # No RateLimiter needed - each worker will sleep independently
+    delay = float(args.delay)
+    
+    # Filter by regulation marks if specified
+    allowed_marks: set[str] | None = None
+    if args.regulation_mark:
+        marks: set[str] = set()
+        for item in args.regulation_mark:
+            for part in str(item).replace(" ", ",").split(","):
+                part = part.strip()
+                if part:
+                    marks.add(part.upper())
+        allowed_marks = marks or None
+
+    ok = 0
+    fail = 0
+    skipped = 0
+    
+    # Parallel fetching with ThreadPoolExecutor - TRUE parallelism without lock
+    with ThreadPoolExecutor(max_workers=int(args.workers)) as ex:
+        futs = [ex.submit(_fetch_one_jp, cid, delay, allowed_marks, args.verbose) for cid in to_fetch]
+        for fut in as_completed(futs):
+            res = fut.result()
+            if res.card is None or res.skills is None:
+                if res.error and res.error.startswith("regulation_"):
+                    skipped += 1
+                    if args.verbose:
+                        print(f"[skip] {res.card_id}: {res.error}", file=sys.stderr)
+                else:
+                    fail += 1
+                    if args.verbose:
+                        print(f"[fail] {res.card_id}: {res.error}", file=sys.stderr)
+                continue
+            
+            dbmod.upsert_card(conn, card_id=res.card_id, card=res.card, skills=res.skills)
+            ok += 1
+            if ok % 50 == 0:
+                print(f"[ok] {ok}/{len(to_fetch)}", file=sys.stderr)
+
+    if allowed_marks:
+        print(f"done: ok={ok} skipped={skipped} fail={fail} marks={','.join(sorted(allowed_marks))} db={db_path}", file=sys.stderr)
+    else:
+        print(f"done: ok={ok} skipped={skipped} fail={fail} db={db_path}", file=sys.stderr)
+    return 0 if fail == 0 else 2
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     from .serve import serve
 
@@ -549,6 +687,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_llm.add_argument("--temperature", type=float, default=0.1, help="溫度（預設 0.1）")
     p_llm.add_argument("--force", action=argparse.BooleanOptionalAction, default=False, help="即使已有 instructions_json 也重跑")
     p_llm.set_defaults(func=cmd_llm_effects)
+
+    p_sync_jp = sub.add_parser("sync-jp", help="從日本官方卡牌網站抓資料並寫入 DB")
+    p_sync_jp.add_argument("--db", default="data/ptcg_jp.sqlite", help="SQLite 檔案路徑")
+    p_sync_jp.add_argument("--map", default="data/limitless_jp_map.json", help="JP 對應檔路徑（可選，使用 --scan-range 時不需要）")
+    p_sync_jp.add_argument("--scan-range", help="掃描 ID 範圍（格式: START-END，例如 40000-50000）")
+    p_sync_jp.add_argument("--regulation-mark", action="append", help="只抓取指定卡標（H,I,J；可重複）")
+    p_sync_jp.add_argument("--limit", type=int, help="最多抓幾張（除錯用）")
+    p_sync_jp.add_argument("--workers", default=8, type=int, help="並行抓取的執行緒數（預設 8）")
+    p_sync_jp.add_argument("--delay", default=0.1, type=float, help="請求間隔秒數（預設 0.1）")
+    p_sync_jp.add_argument("--skip-existing", action=argparse.BooleanOptionalAction, default=True, help="略過已存在的 card_id（預設 true）")
+    p_sync_jp.add_argument("--verbose", action="store_true", help="顯示詳細輸出")
+    p_sync_jp.set_defaults(func=cmd_sync_jp)
 
     p_serve = sub.add_parser("serve", help="啟動本地瀏覽介面（HTTP）")
     p_serve.add_argument("--db", default="ptcg_tw.sqlite", help="SQLite 檔案路徑")

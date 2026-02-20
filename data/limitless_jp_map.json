@@ -1342,5 +1342,505 @@
   "TWM-141": {
     "set": "SVP",
     "number": "258"
+  },
+  "SFA-38": {
+    "set": "SV6a",
+    "number": "38"
+  },
+  "JTG-135": {
+    "set": "SV9",
+    "number": "85"
+  },
+  "TEF-68": {
+    "set": "SV5K",
+    "number": "28"
+  },
+  "TEF-146": {
+    "set": "SV5K",
+    "number": "68"
+  },
+  "DRI-120": {
+    "set": "SV10",
+    "number": "64"
+  },
+  "ASC-22": {
+    "set": "MC",
+    "number": "85"
+  },
+  "ASC-152": {
+    "set": "M2a",
+    "number": "126"
+  },
+  "JTG-136": {
+    "set": "SV9",
+    "number": "86"
+  },
+  "WHT-29": {
+    "set": "SV11W",
+    "number": "26"
+  },
+  "JTG-117": {
+    "set": "SV9",
+    "number": "75"
+  },
+  "SVP-149": {
+    "set": "SV8",
+    "number": "75"
+  },
+  "MEG-6": {
+    "set": "M1S",
+    "number": "1"
+  },
+  "JTG-154": {
+    "set": "SV9",
+    "number": "99"
+  },
+  "SSP-11": {
+    "set": "SV7a",
+    "number": "5"
+  },
+  "SCR-111": {
+    "set": "SV7",
+    "number": "75"
+  },
+  "PFL-19": {
+    "set": "M2",
+    "number": "19"
+  },
+  "SSP-83": {
+    "set": "SV8",
+    "number": "52"
+  },
+  "DRI-122": {
+    "set": "SV10",
+    "number": "66"
+  },
+  "ASC-162": {
+    "set": "SVP",
+    "number": "265"
+  },
+  "PRE-77": {
+    "set": "SV8a",
+    "number": "127"
+  },
+  "JTG-148": {
+    "set": "SV9",
+    "number": "92"
+  },
+  "TEF-24": {
+    "set": "SV5M",
+    "number": "15"
+  },
+  "ASC-206": {
+    "set": "SVP",
+    "number": "267"
+  },
+  "SCR-14": {
+    "set": "SV7",
+    "number": "12"
+  },
+  "PFL-13": {
+    "set": "M2",
+    "number": "13"
+  },
+  "JTG-158": {
+    "set": "XY1y",
+    "number": "54"
+  },
+  "WHT-81": {
+    "set": "BWP",
+    "number": "13"
+  },
+  "JTG-53": {
+    "set": "SV9",
+    "number": "30"
+  },
+  "TEF-23": {
+    "set": "SV5M",
+    "number": "14"
+  },
+  "JTG-52": {
+    "set": "SVP",
+    "number": "257"
+  },
+  "PFL-11": {
+    "set": "M2",
+    "number": "11"
+  },
+  "ASC-96": {
+    "set": "M2a",
+    "number": "78"
+  },
+  "ASC-151": {
+    "set": "M2a",
+    "number": "125"
+  },
+  "JTG-54": {
+    "set": "SVP",
+    "number": "232"
+  },
+  "TWM-158": {
+    "set": "XY7",
+    "number": "72"
+  },
+  "TEF-69": {
+    "set": "SV5K",
+    "number": "29"
+  },
+  "ASC-191": {
+    "set": "M2a",
+    "number": "163"
+  },
+  "JTG-111": {
+    "set": "SV9",
+    "number": "69"
+  },
+  "PFL-12": {
+    "set": "MP",
+    "number": "45"
+  },
+  "JTG-156": {
+    "set": "SV9",
+    "number": "90"
+  },
+  "TWM-164": {
+    "set": "SV5a",
+    "number": "59"
+  },
+  "SCR-42": {
+    "set": "SV7",
+    "number": "24"
+  },
+  "JTG-96": {
+    "set": "SV9",
+    "number": "59"
+  },
+  "ASC-214": {
+    "set": "MC",
+    "number": "702"
+  },
+  "SFA-61": {
+    "set": "MP",
+    "number": "31"
+  },
+  "ASC-150": {
+    "set": "M2a",
+    "number": "124"
+  },
+  "PFL-74": {
+    "set": "M2",
+    "number": "62"
+  },
+  "JTG-47": {
+    "set": "SV9",
+    "number": "26"
+  },
+  "TWM-166": {
+    "set": "SV5a",
+    "number": "66"
+  },
+  "PFL-89": {
+    "set": "M2",
+    "number": "78"
+  },
+  "ASC-95": {
+    "set": "M2a",
+    "number": "77"
+  },
+  "ASC-197": {
+    "set": "M2a",
+    "number": "188"
+  },
+  "ASC-98": {
+    "set": "M2a",
+    "number": "80"
+  },
+  "ASC-62": {
+    "set": "M2a",
+    "number": "50"
+  },
+  "WHT-85": {
+    "set": "BWP",
+    "number": "139"
+  },
+  "PFL-18": {
+    "set": "M2",
+    "number": "18"
+  },
+  "PFL-59": {
+    "set": "MBG",
+    "number": "6"
+  },
+  "JTG-150": {
+    "set": "SV9",
+    "number": "98"
+  },
+  "JTG-147": {
+    "set": "SV9",
+    "number": "91"
+  },
+  "MEG-7": {
+    "set": "M1S",
+    "number": "2"
+  },
+  "SSP-181": {
+    "set": "SV7a",
+    "number": "55"
+  },
+  "SFA-60": {
+    "set": "SV6a",
+    "number": "63"
+  },
+  "TWM-79": {
+    "set": "SV6",
+    "number": "46"
+  },
+  "JTG-55": {
+    "set": "SV9",
+    "number": "32"
+  },
+  "DRI-121": {
+    "set": "SV10",
+    "number": "65"
+  },
+  "TWM-135": {
+    "set": "SV5a",
+    "number": "50"
+  },
+  "JTG-7": {
+    "set": "SVM",
+    "number": "8"
+  },
+  "JTG-64": {
+    "set": "SV9",
+    "number": "40"
+  },
+  "TEF-126": {
+    "set": "SV5K",
+    "number": "54"
+  },
+  "JTG-23": {
+    "set": "SVM",
+    "number": "15"
+  },
+  "DRI-165": {
+    "set": "SV9a",
+    "number": "63"
+  },
+  "BLK-6": {
+    "set": "SV11B",
+    "number": "6"
+  },
+  "MEG-26": {
+    "set": "M1L",
+    "number": "15"
+  },
+  "DRI-32": {
+    "set": "SV9a",
+    "number": "15"
+  },
+  "DRI-33": {
+    "set": "SV9a",
+    "number": "16"
+  },
+  "MEG-5": {
+    "set": "M1L",
+    "number": "5"
+  },
+  "TWM-9": {
+    "set": "SV6",
+    "number": "4"
+  },
+  "TWM-39": {
+    "set": "SV5a",
+    "number": "18"
+  },
+  "MEG-28": {
+    "set": "M1L",
+    "number": "17"
+  },
+  "TWM-159": {
+    "set": "SVP",
+    "number": "149"
+  },
+  "PRE-82": {
+    "set": "SVM",
+    "number": "97"
+  },
+  "BLK-70": {
+    "set": "SV11B",
+    "number": "72"
+  },
+  "MEG-4": {
+    "set": "M1L",
+    "number": "4"
+  },
+  "DRI-34": {
+    "set": "SV9a",
+    "number": "17"
+  },
+  "SFA-6": {
+    "set": "SV6a",
+    "number": "6"
+  },
+  "SFA-2": {
+    "set": "SV6a",
+    "number": "2"
+  },
+  "SSP-21": {
+    "set": "SV8",
+    "number": "12"
+  },
+  "SSP-116": {
+    "set": "SV8",
+    "number": "69"
+  },
+  "SVI-168": {
+    "set": "BW1b",
+    "number": "49"
+  },
+  "SSP-33": {
+    "set": "SV8",
+    "number": "20"
+  },
+  "PRE-26": {
+    "set": "SV8a",
+    "number": "41"
+  },
+  "DRI-86": {
+    "set": "SVOD",
+    "number": "3"
+  },
+  "BLK-38": {
+    "set": "SV11B",
+    "number": "41"
+  },
+  "SSP-178": {
+    "set": "SV8",
+    "number": "104"
+  },
+  "SSP-85": {
+    "set": "SV8",
+    "number": "54"
+  },
+  "JTG-49": {
+    "set": "SV9",
+    "number": "28"
+  },
+  "MEG-59": {
+    "set": "MP",
+    "number": "67"
+  },
+  "BLK-39": {
+    "set": "SV11B",
+    "number": "42"
+  },
+  "ASC-83": {
+    "set": "MC",
+    "number": "295"
+  },
+  "PRE-109": {
+    "set": "SV8a",
+    "number": "174"
+  },
+  "DRI-166": {
+    "set": "SVOD",
+    "number": "18"
+  },
+  "TEF-15": {
+    "set": "SV5K",
+    "number": "8"
+  },
+  "TWM-142": {
+    "set": "SV6",
+    "number": "91"
+  },
+  "MEG-107": {
+    "set": "M1S",
+    "number": "53"
+  },
+  "MEG-126": {
+    "set": "SM1S",
+    "number": "55"
+  },
+  "SSP-186": {
+    "set": "BW7",
+    "number": "68"
+  },
+  "BLK-25": {
+    "set": "SV11B",
+    "number": "28"
+  },
+  "TWM-94": {
+    "set": "SV5a",
+    "number": "40"
+  },
+  "MEG-31": {
+    "set": "M1S",
+    "number": "14"
+  },
+  "SSP-166": {
+    "set": "SV8",
+    "number": "96"
+  },
+  "WHT-54": {
+    "set": "SV11W",
+    "number": "51"
+  },
+  "BLK-86": {
+    "set": "BWP",
+    "number": "129"
+  },
+  "WHT-65": {
+    "set": "SV11W",
+    "number": "60"
+  },
+  "TEF-14": {
+    "set": "SV5K",
+    "number": "7"
+  },
+  "WHT-66": {
+    "set": "SV11W",
+    "number": "61"
+  },
+  "MEG-60": {
+    "set": "M1S",
+    "number": "42"
+  },
+  "MEG-58": {
+    "set": "MP",
+    "number": "21"
+  },
+  "JTG-51": {
+    "set": "SVM",
+    "number": "46"
+  },
+  "PFL-4": {
+    "set": "M2",
+    "number": "4"
+  },
+  "TEF-70": {
+    "set": "SV5K",
+    "number": "30"
+  },
+  "SFA-21": {
+    "set": "SV6a",
+    "number": "21"
+  },
+  "DRI-70": {
+    "set": "SV10",
+    "number": "33"
+  },
+  "SSP-48": {
+    "set": "SV7a",
+    "number": "11"
+  },
+  "SCR-137": {
+    "set": "SV7",
+    "number": "95"
+  },
+  "BLK-79": {
+    "set": "S1W",
+    "number": "57"
   }
 }

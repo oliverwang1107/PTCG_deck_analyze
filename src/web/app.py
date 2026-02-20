@@ -3,7 +3,7 @@ Flask web application for PTCG City League analysis.
 """
 import os
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
@@ -14,8 +14,10 @@ from ..analyzer.winrate import WinRateAnalyzer
 from ..analyzer.matchups import MatchupAnalyzer
 from ..analyzer.trends import TrendsAnalyzer
 from ..analyzer.cards import CardAnalyzer
+from ..analyzer.meta_insight import MetaInsightAnalyzer
 from ..translation import translate_archetype
 from ..utils.card_db import CardDB
+from ..utils.date_utils import get_week_key, get_previous_week
 
 
 app = Flask(__name__, 
@@ -26,19 +28,11 @@ app = Flask(__name__,
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 
-def get_data():
-    """Load or scrape data."""
-    scraper = LimitlessScraper(cache_dir=str(DATA_DIR))
-    data = scraper.load_cached_data()
-    if not data:
-        # Return empty data structure if no cache
-        return {
-            "tournaments": [],
-            "metagame": [],
-            "scraped_at": None
-        }
-    return data
+from .data_manager import DataManager
 
+# Data directory
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
+data_manager = DataManager(DATA_DIR)
 
 @app.route("/")
 def index():
@@ -49,17 +43,38 @@ def index():
 @app.route("/api/overview")
 def api_overview():
     """Get overview statistics."""
-    data = get_data()
+    week_param = request.args.get("week")
+    data = data_manager.get_data()
     
-    total_tournaments = len(data.get("tournaments", []))
-    total_decks = sum(
-        len(t.get("decks", [])) 
-        for t in data.get("tournaments", [])
-    )
+    # Calculate global (latest) week if not provided
+    if not week_param:
+        weeks = data_manager.get_all_weeks()
+        if weeks:
+            week_param = weeks[-1]
     
-    # Count unique archetypes
+    # Filter data for the rolling window (Current + Previous week)
+    window_data = data_manager.get_window_data(week_param, window_size=2)
+    
+    tournaments = window_data.get("tournaments", [])
+    total_tournaments = len(tournaments)
+    total_decks = sum(len(t.get("decks", [])) for t in tournaments)
+    
+    # Breakdown by week
+    current_week_count = 0
+    prev_week_count = 0
+    
+    prev_week_key = get_previous_week(week_param) if week_param else None
+    
+    for t in tournaments:
+        wk = get_week_key(t.get("date", ""))
+        if wk == week_param:
+            current_week_count += len(t.get("decks", []))
+        elif wk == prev_week_key:
+            prev_week_count += len(t.get("decks", []))
+            
+    # Count unique archetypes in this window
     archetypes = set()
-    for t in data.get("tournaments", []):
+    for t in tournaments:
         for d in t.get("decks", []):
             archetypes.add(d.get("archetype", "Unknown"))
     
@@ -67,15 +82,20 @@ def api_overview():
         "total_tournaments": total_tournaments,
         "total_decks": total_decks,
         "total_archetypes": len(archetypes),
-        "scraped_at": data.get("scraped_at")
+        "scraped_at": data.get("scraped_at"),
+        "current_week": week_param,
+        "current_week_decks": current_week_count,
+        "prev_week": prev_week_key,
+        "prev_week_decks": prev_week_count
     })
 
 
 @app.route("/api/archetypes")
 def api_archetypes():
     """Get archetype distribution data."""
-    data = get_data()
-    analyzer = ArchetypeAnalyzer(data)
+    week_param = request.args.get("week")
+    window_data = data_manager.get_window_data(week_param)
+    analyzer = ArchetypeAnalyzer(window_data)
     
     distribution = analyzer.get_distribution_data()
     top_archetypes = [
@@ -92,22 +112,30 @@ def api_archetypes():
 @app.route("/api/archetype/<path:name>/detail")
 def api_archetype_detail(name: str):
     """Get detailed analysis for a specific archetype."""
-    data = get_data()
+    week_param = request.args.get("week")
+    data = data_manager.get_data()
     
-    # Initialize CardDB
-    # Note: connect every time for simplicity, but consider connection pooling for high load
-    card_db = CardDB()
+    # Prepare different data views
+    window_data = data_manager.get_window_data(week_param)
+    history_data = data_manager.get_history_data(week_param)
     
-    archetype_analyzer = ArchetypeAnalyzer(data)
-    matchup_analyzer = MatchupAnalyzer(data)
-    trends_analyzer = TrendsAnalyzer(data)
-    card_analyzer = CardAnalyzer(data, card_db=card_db)
+    # Get CardDB singleton
+    card_db = data_manager.get_card_db()
+    
+    # Use window_data for point-in-time stats
+    archetype_analyzer = ArchetypeAnalyzer(window_data)
+    matchup_analyzer = MatchupAnalyzer(window_data)
+    card_analyzer = CardAnalyzer(window_data, card_db=card_db)
+    
+    # Use history_data for trends
+    trends_analyzer = TrendsAnalyzer(history_data)
     
     detail = archetype_analyzer.get_archetype_detail(name)
     matchups = matchup_analyzer.get_archetype_matchups(name)
     summary = trends_analyzer.get_archetype_summary(name)
+    
     card_usage = card_analyzer.get_card_usage(name)
-    recent_decks = archetype_analyzer.get_recent_decks(name, limit=5)
+    recent_decks = archetype_analyzer.get_recent_decks(name, limit=50)
     
     # Translate opponent names in matchups
     if matchups:
@@ -123,21 +151,44 @@ def api_archetype_detail(name: str):
     # Check if card data is available
     has_card_data = data.get("has_card_data", False) or card_usage.get("deck_count", 0) > 0
     
+    # Deep Analysis Data
+    consensus_score = 0.0
+    tech_trends = {}
+    ace_spec_trends = {}
+    energy_profile = None
+    
+    if has_card_data:
+        # Consensus score should be based on the window (current meta)
+        consensus_score = archetype_analyzer.calculate_consensus_score(name)
+        # Trends should be based on history
+        tech_trends = trends_analyzer.get_tech_trends(name)
+        ace_spec_trends = trends_analyzer.get_ace_spec_trends(name)
+        # Energy profile
+        meta_insight = MetaInsightAnalyzer(window_data)
+        energy_profile = meta_insight.get_energy_profile(name)
+    
     return jsonify({
         "stats": detail,
         "matchups": matchups,
         "building_trends": summary,
         "card_analysis": card_usage if has_card_data else None,
         "has_card_data": has_card_data,
-        "recent_decks": recent_decks
+        "recent_decks": recent_decks,
+        "energy_profile": energy_profile,
+        "deep_analysis": {
+            "consensus_score": round(consensus_score, 2),
+            "tech_trends": tech_trends,
+            "ace_spec_trends": ace_spec_trends
+        }
     })
 
 
 @app.route("/api/winrates")
 def api_winrates():
     """Get win rate statistics."""
-    data = get_data()
-    analyzer = WinRateAnalyzer(data)
+    week_param = request.args.get("week")
+    window_data = data_manager.get_window_data(week_param)
+    analyzer = WinRateAnalyzer(window_data)
     
     return jsonify({
         "chart_data": analyzer.get_chart_data(),
@@ -148,8 +199,9 @@ def api_winrates():
 @app.route("/api/matchups")
 def api_matchups():
     """Get matchup matrix data."""
-    data = get_data()
-    analyzer = MatchupAnalyzer(data)
+    week_param = request.args.get("week")
+    window_data = data_manager.get_window_data(week_param)
+    analyzer = MatchupAnalyzer(window_data)
     
     top_n = request.args.get("top", 10, type=int)
     
@@ -162,8 +214,9 @@ def api_matchups():
 @app.route("/api/matchups-zh")
 def api_matchups_chinese():
     """Get matchup matrix data with Chinese translations."""
-    data = get_data()
-    analyzer = MatchupAnalyzer(data)
+    week_param = request.args.get("week")
+    window_data = data_manager.get_window_data(week_param)
+    analyzer = MatchupAnalyzer(window_data)
     
     top_n = request.args.get("top", 10, type=int)
     
@@ -185,8 +238,9 @@ def api_matchups_chinese():
 @app.route("/api/trends")
 def api_trends():
     """Get metagame trend data."""
-    data = get_data()
-    analyzer = TrendsAnalyzer(data)
+    week_param = request.args.get("week")
+    history_data = data_manager.get_history_data(week_param)
+    analyzer = TrendsAnalyzer(history_data)
     
     return jsonify({
         "chart_data": analyzer.get_chart_data(),
@@ -202,6 +256,9 @@ def api_scrape():
     scraper = LimitlessScraper(cache_dir=str(DATA_DIR))
     data = scraper.scrape_all(tournament_limit=limit)
     
+    # Refresh cache
+    data_manager.get_data(force_refresh=True)
+    
     return jsonify({
         "status": "success",
         "tournaments_scraped": len(data.get("tournaments", [])),
@@ -209,11 +266,47 @@ def api_scrape():
     })
 
 
+@app.route("/api/meta-insight")
+def api_meta_insight():
+    """Get tier list, power rankings, and meta health data."""
+    week_param = request.args.get("week")
+    window_data = data_manager.get_window_data(week_param)
+    analyzer = MetaInsightAnalyzer(window_data)
+
+    insight = analyzer.get_full_insight()
+
+    # Translate archetype names
+    for tier_key in ["S", "A", "B", "C"]:
+        for item in insight["tier_list"].get(tier_key, []):
+            item["name_zh"] = translate_archetype(item["name"])
+    for item in insight["power_rankings"]:
+        item["name_zh"] = translate_archetype(item["name"])
+
+    return jsonify(insight)
+
+
+@app.route("/api/meta-share-trend")
+def api_meta_share_trend():
+    """Get meta share trend data for stacked area chart."""
+    week_param = request.args.get("week")
+    history_data = data_manager.get_history_data(week_param)
+    analyzer = MetaInsightAnalyzer(history_data)
+
+    trend = analyzer.get_meta_share_trend(top_n=8)
+
+    # Translate archetype names
+    for arch in trend["archetypes"]:
+        arch["name_zh"] = translate_archetype(arch["name"])
+
+    return jsonify(trend)
+
+
 @app.route("/api/archetypes-zh")
 def api_archetypes_chinese():
     """Get archetype distribution with Chinese translations."""
-    data = get_data()
-    analyzer = ArchetypeAnalyzer(data)
+    week_param = request.args.get("week")
+    window_data = data_manager.get_window_data(week_param)
+    analyzer = ArchetypeAnalyzer(window_data)
     
     # Get top archetypes and translate them
     top_archetypes = []
@@ -237,16 +330,6 @@ def api_archetypes_chinese():
     })
 
 
-def get_week_key(date_str: str) -> str:
-    """Get week identifier from date string (YYYY-WXX format)."""
-    try:
-        dt = datetime.fromisoformat(date_str.split("T")[0])
-        iso_calendar = dt.isocalendar()
-        return f"{iso_calendar[0]}-W{iso_calendar[1]:02d}"
-    except (ValueError, AttributeError):
-        return "Unknown"
-
-
 def get_week_label(week_key: str) -> str:
     """Get human readable week label."""
     try:
@@ -259,7 +342,7 @@ def get_week_label(week_key: str) -> str:
 @app.route("/api/tournaments/weekly")
 def api_tournaments_weekly():
     """Get tournaments grouped by week with Chinese-translated archetypes."""
-    data = get_data()
+    data = data_manager.get_data()
     tournaments = data.get("tournaments", [])
     
     # Group tournaments by week

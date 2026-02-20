@@ -8,3 +8,15 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Data files
+*.sqlite
+data/*.sqlite
+
+# Debug output
+debug_*.json
+debug_*.txt
+*_debug.html
+
+# Scripts output
+scripts/output/
